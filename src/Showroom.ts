@@ -1,5 +1,13 @@
 import * as THREE from 'three';
 import {assetUrl} from './assetUrl';
+import {FrameScheduler} from './FrameScheduler';
+import {PerformanceMonitor} from './PerformanceMonitor';
+import {MainSceneBatch,SOURCE_LAYER} from './MainSceneBatch';
+import {SeatSamplingCache} from './SeatSamplingCache';
+import {renderSettings,setRenderSettings,trackRenderMaterial} from './RenderSettings';
+import {compareImages} from './ImageComparison';
+import type {ImageRegion} from './ImageComparison';
+import {calibrateBatching,calibrationCameras,chooseBatching} from './BatchCalibration';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {ElasticZoom} from './ElasticZoom';
 import {InteriorLook,cabinEye,cabinLens,cabinRotation,doorApproach,doorPath,doorRotation,responsiveLens,seatCamera,cabinPath} from './InteriorCamera';
@@ -66,6 +74,22 @@ const DIMENSIONS_VIEW=new THREE.Vector3(-13.48839494,3.17197605,14.89201792).sub
 
 export class Showroom {
  private renderer:THREE.WebGLRenderer;
+ private scheduler:FrameScheduler;
+ private monitor:PerformanceMonitor;
+ private displayBatch=new MainSceneBatch();
+ private seatSampling:SeatSamplingCache;
+ private reference:boolean;
+ private profiling:boolean;
+ private pausedAt:number|null=null;
+ private contextUnavailable=false;
+ private benchmark?:{started:number;phase:number;position:THREE.Vector3;rotation:THREE.Quaternion;target:THREE.Vector3;lens:number;openings:OpeningState;frames:number};
+ private benchmarkResult?:Record<string,unknown>;
+ private comparing=false;
+ private comparison?:{ssim:number;passed:boolean;regions:{name:string;ssim:number}[];maxChannelDifference:number;width:number;height:number;modeAfterTest:string;attempts:{path:string;ssim:number;regions:{name:string;ssim:number}[]}[]};
+ private comparedImages?:{reference:string;optimized:string};
+ private batchRejected=false;
+ private cacheRejected=false;
+ private batchCalibration={exterior:chooseBatching(null,null,null,null),interior:chooseBatching(null,null,null,null)};
  private scene=new THREE.Scene();
  private vehicleRoot=new THREE.Group();
  private mirrors:MirrorReflections;
@@ -87,7 +111,9 @@ export class Showroom {
  private readyWheels=new Map<WheelId,THREE.Group>();
  private wheelMotion=new WheelMotion();
  private ready=false;
- private idleDeadline=Infinity;
+ private idleAt=Infinity;
+ private get idleDeadline(){return this.idleAt;}
+ private set idleDeadline(value:number){this.idleAt=value;this.scheduler?.wakeAt(value);}
  private settledView?:string;
  private tireFinish=new TireFinish();
  private cabinFinishes=new CabinFinishes();
@@ -116,7 +142,9 @@ export class Showroom {
  private config?:Configuration;
  private current={doors:0,roof:0,projector:0};
  private roofSequence=0;
- private dirty=true;
+ private dirtyState=true;
+ private get dirty(){return this.dirtyState;}
+ private set dirty(value:boolean){this.dirtyState=value;if(value)this.scheduler?.wake();}
  private disposed=false;
  private lastTime=0;
  private size:ResizeObserver;
@@ -139,7 +167,12 @@ export class Showroom {
  private renderedFrames=0;
 
  constructor(private host:HTMLDivElement,private callbacks:Callbacks,readonly vehicle:VehicleId='n90'){
+  const params=new URLSearchParams(location.search);this.profiling=params.get('perf')==='1';this.reference=this.profiling&&params.get('reference')==='1';
   this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:false,powerPreference:'high-performance'});
+  this.scheduler=new FrameScheduler(this.tick);this.monitor=new PerformanceMonitor(this.renderer,this.profiling);
+  this.seatSampling=new SeatSamplingCache(this.renderer,this.invalidate,this.vehicle==='n90-standard'?'N90 Max rear-seat visual check failed; retaining original sampling':undefined);
+  setRenderSettings(this.renderer,{reference:this.reference,areaLights:[],staticLights:false});
+  this.raycaster.layers.enable(SOURCE_LAYER);
   this.mirrors=new MirrorReflections(this.renderer);
   this.renderer.setPixelRatio(Math.max(devicePixelRatio,2));this.renderer.setClearColor('#acb9c4');
   this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.0;
@@ -152,7 +185,7 @@ export class Showroom {
   this.controls.minDistance=8;this.controls.maxDistance=30;this.controls.minPolarAngle=.20;this.controls.maxPolarAngle=1.58;this.controls.rotateSpeed=.6;this.controls.zoomSpeed=.75;this.controls.autoRotateSpeed=.65;
   this.controls.addEventListener('change',this.invalidate);this.controls.addEventListener('start',this.beginInteraction);
   this.zoom=new ElasticZoom(this.camera,this.controls,this.renderer.domElement,reducedMotion,()=>{this.beginInteraction();this.armIdle(1600);this.gesture=undefined;this.dirty=true});
-  this.interiorLook=new InteriorLook(this.camera,this.renderer.domElement,reducedMotion);
+  this.interiorLook=new InteriorLook(this.camera,this.renderer.domElement,reducedMotion,this.invalidate);
   this.renderer.domElement.addEventListener('pointerdown',this.pointerDown);this.renderer.domElement.addEventListener('pointerup',this.pointerUp);
   this.renderer.domElement.addEventListener('pointermove',this.pointerMove);this.renderer.domElement.addEventListener('pointercancel',this.pointerCancel);
   this.renderer.domElement.addEventListener('lostpointercapture',this.pointerCancel);window.addEventListener('blur',this.clearInteraction);
@@ -162,14 +195,25 @@ export class Showroom {
   document.addEventListener('visibilitychange',this.visibilityChanged);
   this.renderer.domElement.addEventListener('webglcontextlost',this.contextLost);
   this.renderer.domElement.addEventListener('webglcontextrestored',this.contextRestored);
-  this.renderer.setAnimationLoop(this.tick);
+  this.scheduler.wake();
  }
  private invalidate=()=>{this.dirty=true};
  private cancelTween=()=>{this.cameraTween=undefined};
- private beginInteraction=()=>{this.cancelTween();this.idleDeadline=Infinity};
+ private beginInteraction=()=>{if(this.benchmark)this.stopBenchmark();this.cancelTween();this.idleDeadline=Infinity};
  private armIdle(delay=1500){this.idleDeadline=this.ready&&this.view==='exterior'&&!this.viewJourney&&!this.config?.autoRotate&&!this.config?.roof&&!this.config?.dimensions?performance.now()+delay:Infinity;}
  private clearInteraction=()=>{this.pointers.clear();this.gesture=undefined;this.idleDeadline=Infinity;};
- private visibilityChanged=()=>{this.clearInteraction();if(!document.hidden){this.lastTime=performance.now();this.armIdle();this.dirty=true;}};
+ private visibilityChanged=()=>{
+  this.clearInteraction();
+  if(document.hidden)this.suspendRendering();else{this.resumeRendering();this.armIdle();}
+ };
+ private suspendRendering(){if(this.pausedAt===null)this.pausedAt=performance.now();this.scheduler.pause();this.monitor.endFrame(false);}
+ private resumeRendering(){
+   if(document.hidden||this.contextUnavailable||this.disposed)return;
+   const now=performance.now(),paused=this.pausedAt===null?0:now-this.pausedAt;this.pausedAt=null;
+   if(this.cameraTween)this.cameraTween.started+=paused;if(this.viewJourney)this.viewJourney.started+=paused;if(this.seatJourney)this.seatJourney.started+=paused;this.wheelMotion.pauseFor(paused);
+   if(this.benchmark)this.benchmark.started+=paused;
+   this.lastTime=now;this.scheduler.resume();this.scheduler.wakeAt(this.idleDeadline);this.dirty=true;
+ }
  private pointerDown=(e:PointerEvent)=>{
   if(this.viewJourney||this.seatJourney||!this.ready)return;
   this.beginInteraction();
@@ -232,8 +276,13 @@ export class Showroom {
   this.reflectionDirty=true;this.dirty=true;this.callbacks.onOpeningsChange({...this.openingTargets});
  }
  private get openingsSettled(){return openingIds.every(id=>this.openingProgress[id]===Number(this.openingTargets[id]))}
- private contextLost=(e:Event)=>{e.preventDefault();this.renderer.setAnimationLoop(null)};
- private contextRestored=()=>{this.renderer.setAnimationLoop(this.tick);this.groundReflection?.invalidate();this.lampGlow.invalidate();this.reflectionDirty=true;this.contactDirty=true;this.renderer.shadowMap.needsUpdate=true;this.dirty=true};
+ private contextLost=(e:Event)=>{e.preventDefault();this.contextUnavailable=true;this.suspendRendering();};
+ private contextRestored=()=>{void this.restoreContext().catch(error=>{console.warn('WebGL restore preparation failed; a fresh frame will retry.',error);this.contextUnavailable=false;this.resumeRendering();});};
+ private async restoreContext(){
+  this.monitor.contextRestored();await this.seatSampling.contextRestored();if(this.disposed)return;
+  this.mirrors.contextRestored();this.scene.updateMatrixWorld();await this.mirrors.warm(this.scene,this.camera);await this.renderer.compileAsync(this.scene,this.camera);if(this.disposed)return;
+  this.groundReflection?.invalidate();this.lampGlow.invalidate();this.reflectionDirty=true;this.contactDirty=true;this.renderer.shadowMap.needsUpdate=true;this.contextUnavailable=false;this.resumeRendering();
+ }
  private resize=()=>{
   if(this.disposed)return;
   const w=Math.max(1,this.host.clientWidth),h=Math.max(1,this.host.clientHeight);
@@ -281,6 +330,8 @@ export class Showroom {
   const floor=new THREE.Mesh(new THREE.CircleGeometry(64.8,128),floorMaterial);floor.name='Studio floor';floor.rotation.set(-Math.PI/2,0,-.98);floor.position.y=-.006;floor.receiveShadow=true;this.scene.add(floor);
   this.scene.add(this.contact.plane);
   this.groundReflection=new GroundReflection(this.vehicleRoot,this.camera);this.scene.add(this.groundReflection.mesh);
+  const areaLights:THREE.RectAreaLight[]=[];this.scene.traverse(o=>{if(o instanceof THREE.RectAreaLight)areaLights.push(o);});
+  setRenderSettings(this.renderer,{reference:this.reference,areaLights,staticLights:false});
  }
  private setupMeasurements(){
   const dimensions=vehicleDimensions(this.vehicle);
@@ -363,6 +414,16 @@ export class Showroom {
   // Do not render before compileAsync: that forces synchronous shader linking
   // and used to freeze the loading overlay at 88% during window resizing.
   await this.uploadTextures([this.scene,...wheels]);if(this.disposed)return;
+  this.seatSampling.bind([this.car]);await this.seatSampling.update();if(this.disposed)return;
+  this.trackMaterials(wheels);
+  this.scene.updateMatrixWorld(true);
+  await this.mirrors.warm(this.scene,this.camera);if(this.disposed)return;
+  // Initialize exact-size mirror images while the loading screen is visible.
+  // Their envMap shader variants are then included in asynchronous compilation.
+  this.contact.update(this.renderer,this.scene,[this.vehicleRoot]);this.contactDirty=false;
+  if(this.groundReflection)this.groundReflection.mesh.visible=false;
+  try{this.mirrors.update(this.scene,this.environmentSource!,undefined,true);}finally{if(this.groundReflection)this.groundReflection.mesh.visible=true;}
+  this.reflectionDirty=false;
   await this.renderer.compileAsync(this.scene,this.camera);
   if(this.disposed)return;this.callbacks.onProgress(97);
   await this.warmWheels(wheels);
@@ -372,7 +433,23 @@ export class Showroom {
   await yieldDuringLoad();if(this.disposed)return;
   this.resize();
   freezeLocalTransforms(this.scene);for(const wheel of wheels)freezeLocalTransforms(wheel);
+  this.displayBatch.prepare([this.car,...wheels],this.vehicleRoot,this.renderer.extensions.has('WEBGL_multi_draw')&&this.renderer.extensions.has('EXT_disjoint_timer_query_webgl2'));
+  this.displayBatch.setEnabled(!this.reference);this.scene.updateMatrixWorld(true);this.displayBatch.sync(this.vehicleRoot);
+  this.scene.matrixWorldAutoUpdate=false;
+  await this.mirrors.warm(this.scene,this.camera);if(this.disposed)return;
+  await this.renderer.compileAsync(this.scene,this.camera);if(this.disposed)return;
+  const seat=seatCamera('driver',this.vehicle)!;
+  this.batchCalibration=await calibrateBatching(this.renderer,this.scene,this.displayBatch,this.vehicleRoot,calibrationCameras(this.camera,{...seat,lens:responsiveLens(seat.lens,this.camera.aspect)}),()=>this.disposed);
+  if(this.disposed)return;
+  // A rejected candidate will never be drawn. Release duplicate GPU buffers
+  // instead of keeping them resident on an already memory-heavy mobile scene.
+  if(!this.batchCalibration.exterior.enabled&&!this.batchCalibration.interior.enabled)this.displayBatch.dispose();
+  this.displayBatch.setEnabled(!this.reference&&this.batchCalibration.exterior.enabled);this.displayBatch.sync(this.vehicleRoot);
   this.ready=true;this.renderer.render(this.scene,this.camera);this.callbacks.onProgress(100);void this.configure(config);
+ }
+ private trackMaterials(wheels:THREE.Object3D[]=[...this.readyWheels.values()]){
+  for(const root of [this.scene,...wheels])root.traverse(o=>{if(o instanceof THREE.Mesh)for(const m of Array.isArray(o.material)?o.material:[o.material])trackRenderMaterial(m,this.renderer);});
+  for(const b of this.fasciaBindings){trackRenderMaterial(b.body,this.renderer);trackRenderMaterial(b.brushed,this.renderer);}
  }
  private async uploadTextures(roots:THREE.Object3D[]){
   const textures=new Set<THREE.Texture>([...this.cabinFinishes.textures,...this.n70CabinFinishes.textures]);
@@ -554,11 +631,14 @@ export class Showroom {
   }
   this.config={...next};
   this.groundReflection?.invalidate();this.lampGlow.invalidate();
-  if(!previous||['paint','wheel','trim','interior','doors','roof','projector','lights'].some(k=>previous[k as keyof Configuration]!==next[k as keyof Configuration]))this.reflectionDirty=true;
+  if(!previous||['paint','wheel','trim','interior','doors','roof','projector','lights'].some(k=>previous[k as keyof Configuration]!==next[k as keyof Configuration])){
+   this.mirrors.invalidate(!previous||['wheel','doors','roof','projector'].some(k=>previous[k as keyof Configuration]!==next[k as keyof Configuration])?'all':'interior');this.reflectionDirty=false;
+  }
   if(!this.car||!this.ready)return;
   (isN70(this.vehicle)?this.n70CabinFinishes:this.cabinFinishes).apply(next.interior);
+  if(previous?.interior!==next.interior)void this.seatSampling.update();
   if(previous?.doors!==next.doors){for(const id of openingIds)this.openingTargets[id]=next.doors;this.publishOpenings();}
-  this.applyPaint(next);this.controls.autoRotate=this.view==='exterior'&&!this.viewJourney&&next.autoRotate&&!reducedMotion;this.measurements.visible=this.view==='exterior'&&!this.viewJourney&&next.dimensions;
+  this.applyPaint(next);this.trackMaterials();this.controls.autoRotate=this.view==='exterior'&&!this.viewJourney&&next.autoRotate&&!reducedMotion;this.measurements.visible=this.view==='exterior'&&!this.viewJourney&&next.dimensions;
   if(previous?.autoRotate!==next.autoRotate){
    if(next.autoRotate){this.cancelTween();this.idleDeadline=Infinity;}
    else if(!this.cameraTween)this.armIdle(); // a simultaneous Reset keeps its authored transition
@@ -715,8 +795,8 @@ export class Showroom {
   if(q===1){this.seatJourney=undefined;this.camera.position.copy(journey.to.eye);this.interiorLook.enable(journey.to.lens);this.callbacks.onInteriorSeatChange(this.interiorSeat,false);}
  }
  resetView(){if(this.viewJourney||this.seatJourney)return;if(this.view==='interior'){const seat=seatCamera(this.interiorSeat,this.vehicle);if(!seat)return;this.interiorLook.reset(seat.rotation,seat.lens);this.dirty=true;}else this.moveCamera(HOME.clone(),TARGET.clone())}
- private tick=(now:number)=>{
-  if(this.disposed||document.hidden||!this.ready)return;
+ private tick=(now:number):boolean=>{
+  if(this.disposed||document.hidden||this.contextUnavailable||!this.ready||this.comparing)return false;
   const dt=Math.min(.05,(now-this.lastTime)/1000||.016);this.lastTime=now;
   if(this.view==='exterior'&&!this.viewJourney&&this.ready&&now>=this.idleDeadline&&!this.pointers.size&&!this.cameraTween&&!this.config?.autoRotate&&!this.config?.roof&&!this.config?.dimensions){
    this.idleDeadline=Infinity;
@@ -757,27 +837,133 @@ export class Showroom {
    }
    if(moved){this.groundReflection?.invalidate();this.lampGlow.invalidate();this.renderer.shadowMap.needsUpdate=true;this.contactDirty=true;this.dirty=true;}
   }
-  if(this.viewJourney)this.updateViewJourney(now);
+  let cameraMoving=false;
+  if(this.benchmark){this.animateBenchmark(now);cameraMoving=!!this.benchmark;}
+  else if(this.viewJourney)this.updateViewJourney(now);
   else if(this.seatJourney)this.updateSeatJourney(now);
-  else if(this.view==='interior'){if(this.interiorLook.update(dt)){this.lens=this.interiorLook.fieldOfView;this.updateLens();this.dirty=true;}}
-  else{if(this.zoom.update(dt))this.dirty=true;if(this.controls.update())this.dirty=true;}
-  if(this.dirty){
+  else if(this.view==='interior'){if(this.interiorLook.update(dt)){cameraMoving=true;this.lens=this.interiorLook.fieldOfView;this.updateLens();this.dirty=true;}}
+  else{if(this.zoom.update(dt))this.dirty=true;if(this.controls.update()){cameraMoving=true;this.dirty=true;}}
+  const rendered=this.dirty;
+  if(rendered){this.monitor.beginFrame(now);this.monitor.measure('frameCpuSubmission',()=>this.renderFrame(),false);}
+  const continuing=this.reference||!!this.benchmark||!!this.cameraTween||!!this.viewJourney||!!this.seatJourney||this.wheelMotion.active||this.zoom.active||cameraMoving||this.controls.autoRotate||!this.openingsSettled||!this.roofSettled||this.projector?.playbackSettled===false||this.current.projector!==Number(this.config?.projector);
+  this.monitor.endFrame(continuing&&rendered);return continuing;
+ };
+ private renderFrame(){
+   const allowed=this.viewJourney?this.batchCalibration.exterior.enabled&&this.batchCalibration.interior.enabled:this.batchCalibration[this.view].enabled;
+   this.displayBatch.setEnabled(!this.reference&&!this.batchRejected&&allowed);
+   this.scene.updateMatrixWorld();this.camera.updateMatrixWorld();this.displayBatch.sync(this.vehicleRoot);
    // Reflection captures and blur passes belong to the same displayed frame.
    this.renderer.info.reset();
    // Keep the showroom's soft reflection bands balanced while orbiting around the car.
    // The studio stays fixed as the viewer orbits, including mirror capture directions.
-   if(this.contactDirty&&this.car&&this.activeWheels){this.contact.update(this.renderer,this.scene,[this.vehicleRoot]);this.contactDirty=false;}
-   if(this.reflectionDirty&&this.car&&this.environmentSource&&!this.viewJourney&&!this.seatJourney&&!this.wheelMotion.active&&this.openingsSettled&&this.roofSettled&&this.current.projector===Number(this.config?.projector)&&this.projector?.playbackSettled!==false){
+   if(this.contactDirty&&this.car&&this.activeWheels){this.monitor.measure('contactShadows',()=>this.contact.update(this.renderer,this.scene,[this.vehicleRoot]));this.contactDirty=false;}
+   if((this.reflectionDirty||this.mirrors.hasPending)&&this.car&&this.environmentSource&&!this.viewJourney&&!this.seatJourney&&!this.wheelMotion.active&&this.openingsSettled&&this.roofSettled&&this.current.projector===Number(this.config?.projector)&&this.projector?.playbackSettled!==false){
+    if(this.reflectionDirty)this.mirrors.invalidate();
     if(this.groundReflection)this.groundReflection.mesh.visible=false;
-    try{this.mirrors.update(this.scene,this.environmentSource)}finally{if(this.groundReflection)this.groundReflection.mesh.visible=true;}
+    try{this.monitor.measure('mirrors',()=>this.mirrors.update(this.scene,this.environmentSource!,this.camera,this.reference));}finally{if(this.groundReflection)this.groundReflection.mesh.visible=true;}
     this.reflectionDirty=false;
-    this.groundReflection?.invalidate();
    }
-   this.renderer.render(this.scene,this.camera);
-   if(this.view==='exterior'&&!this.viewJourney&&this.config?.lights)this.lampGlow.render(this.renderer,this.scene,this.camera,this.vehicleRoot);
+   this.monitor.measure('groundReflection',()=>this.groundReflection?.prepare(this.renderer,this.scene,this.camera));
+   this.monitor.measure('mainScene',()=>this.renderer.render(this.scene,this.camera));
+   if(this.view==='exterior'&&!this.viewJourney&&this.config?.lights)this.monitor.measure('lampGlow',()=>this.lampGlow.render(this.renderer,this.scene,this.camera,this.vehicleRoot));
    this.updateLabels();this.dirty=false;this.renderedFrames++;
+ }
+ private get canCompare(){return this.profiling&&this.ready&&!this.contextUnavailable&&!this.comparing&&!this.viewJourney&&!this.seatJourney&&!this.cameraTween&&!this.wheelMotion.active&&this.openingsSettled&&this.roofSettled&&this.current.projector===Number(this.config?.projector)&&this.projector?.playbackSettled!==false;}
+ get canMeasure(){return this.canCompare&&this.current.projector===0;}
+ startBenchmark(){
+  if(!this.canMeasure||this.benchmark)throw new Error('请等待视角和机构动画结束后再测试。');
+  this.benchmark={started:performance.now(),phase:0,position:this.camera.position.clone(),rotation:this.camera.quaternion.clone(),target:this.controls.target.clone(),lens:this.lens,openings:{...this.openingTargets},frames:this.renderedFrames};
+  this.controls.enabled=false;this.interiorLook.disable();this.idleDeadline=Infinity;this.monitor.reset();this.benchmarkResult=undefined;this.dirty=true;
+ }
+ private animateBenchmark(now:number){
+  const benchmark=this.benchmark;if(!benchmark)return;
+  const t=(now-benchmark.started)/1000;
+  if(t>=30){this.stopBenchmark(true);return;}
+  if(this.view==='exterior'){
+   const phase=t<18?0:t<22?1:t<26?2:3;
+   if(phase!==benchmark.phase){benchmark.phase=phase;for(const id of openingIds)this.openingTargets[id]=phase%2===1;this.publishOpenings();}
+   const home=new THREE.Spherical().setFromVector3(HOME.clone().sub(TARGET)),radius=home.radius*(.85+.15*Math.cos(t*.7));
+   this.camera.position.setFromSphericalCoords(radius,home.phi+.20*Math.sin(t*.4),home.theta+.7*Math.sin(t*.6)).add(TARGET);this.camera.lookAt(TARGET);
+  }else{
+   const seat=seatCamera(this.interiorSeat,this.vehicle);if(!seat)return;
+   this.camera.position.copy(seat.eye);const yaw=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),.7*Math.sin(t*.6)),pitch=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),.2*Math.sin(t*.5));
+   this.camera.quaternion.copy(seat.rotation).premultiply(yaw).multiply(pitch);this.lens=seat.lens*(1+.08*Math.sin(t*.4));this.updateLens();
   }
- };
+  this.dirty=true;
+ }
+ stopBenchmark(completed=false){
+  const b=this.benchmark;if(!b)return;
+  this.benchmarkResult={completed,durationSeconds:Number(((performance.now()-b.started)/1000).toFixed(2)),renderedFrames:this.renderedFrames-b.frames,
+   scenario:this.view==='exterior'?'orbit-zoom-doors-30s':'cabin-look-zoom-30s',vehicle:this.vehicle,seat:this.interiorSeat,renderPath:this.reference?'reference':'optimized',timings:this.monitor.report()};
+  this.benchmark=undefined;this.camera.position.copy(b.position);this.camera.quaternion.copy(b.rotation);this.controls.target.copy(b.target);this.lens=b.lens;this.updateLens();this.openingTargets={...b.openings};this.publishOpenings();
+  this.controls.enabled=this.view==='exterior';if(this.view==='interior')this.interiorLook.enable(b.lens);this.lastTime=performance.now();this.monitor.endFrame(false);this.dirty=true;
+ }
+ getPerformanceReport(){
+  return {schemaVersion:1,generatedAt:new Date().toISOString(),userAgent:navigator.userAgent,url:location.href,vehicle:this.vehicle,view:this.view,seat:this.interiorSeat,configuration:this.config,
+   renderPath:this.reference?'reference':'optimized',nativePixelRatio:devicePixelRatio,renderPixelRatio:this.renderer.getPixelRatio(),
+   viewport:{width:this.host.clientWidth,height:this.host.clientHeight},drawingBuffer:{width:this.renderer.domElement.width,height:this.renderer.domElement.height},
+   timing:this.monitor.report(),scheduler:this.scheduler.diagnostics,renderedFrames:this.renderedFrames,drawCalls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,
+   memoryObjects:this.renderer.info.memory,batching:{...this.displayBatch.diagnostics,rejectedByVisualTest:this.batchRejected,calibration:this.batchCalibration},seatSampling:{...this.seatSampling.diagnostics,rejectedByVisualTest:this.cacheRejected},
+   mirrors:this.mirrors.diagnostics,groundCaptures:this.groundReflection?.captureCount,lampMask:this.lampGlow.getDiagnostics(),auxiliaryBuffers:{contact:{width:1024,height:512,count:2},ground:{width:512,height:512,count:3},seat:{width:1024,height:1024,type:'FP32',count:this.seatSampling.diagnostics.activeCaches}},
+   benchmark:{running:!!this.benchmark,elapsedSeconds:this.benchmark?(performance.now()-this.benchmark.started)/1000:0,lastResult:this.benchmarkResult},comparison:this.comparison};
+ }
+ private async setReferencePath(reference:boolean){
+  this.reference=reference;setRenderSettings(this.renderer,{...renderSettings(this.renderer),reference});
+  this.displayBatch.setEnabled(!reference&&!this.batchRejected);this.trackMaterials();
+  const materials=new Set<THREE.Material>();for(const root of [this.scene,...this.readyWheels.values()])root.traverse(o=>{if(o instanceof THREE.Mesh)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);});
+  for(const material of materials)material.needsUpdate=true;
+  await this.seatSampling.update();if(this.disposed)return;
+  if(this.cacheRejected)this.seatSampling.disable();
+  this.scene.updateMatrixWorld();this.displayBatch.sync(this.vehicleRoot);await this.renderer.compileAsync(this.scene,this.camera);await this.mirrors.warm(this.scene,this.camera);
+  this.groundReflection?.invalidate();this.lampGlow.invalidate();this.contactDirty=true;this.mirrors.invalidate();this.reflectionDirty=true;
+ }
+ private capturePixels(){
+  if(this.renderer.getContext().isContextLost())throw new Error('WebGL 正在恢复，请稍后重新比较。');
+  this.renderFrame();const canvas=this.renderer.domElement,copy=document.createElement('canvas');copy.width=canvas.width;copy.height=canvas.height;
+  const context=copy.getContext('2d',{willReadFrequently:true})!;context.drawImage(canvas,0,0);
+  if(this.renderer.getContext().isContextLost())throw new Error('WebGL 正在恢复，请稍后重新比较。');
+  return {pixels:context.getImageData(0,0,copy.width,copy.height),png:copy.toDataURL('image/png')};
+ }
+ private comparisonRegions():ImageRegion[]{
+  const regions:ImageRegion[]=[],patterns=[['seats',/座椅|坐垫|头枕/],['screens',/中控屏|显示面|电动幕布/],['glass',/车窗|玻璃/],['mirrors',/后视镜.*镜面/],['paint',/参考配色/],['lights',/灯带|大灯/]] as const;
+  const point=new THREE.Vector3();
+  for(const [name,pattern]of patterns){
+   const bounds=new THREE.Box2();let count=0;
+   this.car?.traverse(o=>{
+    if(!(o instanceof THREE.Mesh)||(Array.isArray(o.material)?o.material:[o.material]).every(m=>!pattern.test(m.name)&&!(name==='paint'&&m.userData.n70Kind==='paint')))return;
+    for(let parent:THREE.Object3D|null=o;parent;parent=parent.parent)if(!parent.visible)return;
+    o.geometry.computeBoundingBox();const box=o.geometry.boundingBox;if(!box)return;
+    for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){
+     point.set(x,y,z).applyMatrix4(o.matrixWorld).project(this.camera);if(point.z<-1||point.z>1)continue;
+     bounds.expandByPoint(new THREE.Vector2((point.x*.5+.5)*this.renderer.domElement.width,(-point.y*.5+.5)*this.renderer.domElement.height));count++;
+    }
+   });
+   if(!count)continue;const x=Math.max(0,bounds.min.x),y=Math.max(0,bounds.min.y),right=Math.min(this.renderer.domElement.width,bounds.max.x),bottom=Math.min(this.renderer.domElement.height,bounds.max.y);
+   if(right>x+8&&bottom>y+8)regions.push({name,x,y,width:right-x,height:bottom-y});
+  }
+  return regions;
+ }
+ async compareCurrentFrame(){
+  if(!this.canCompare||this.benchmark)throw new Error('请等待视角和机构动画结束后再对比。');
+  const previous=this.reference;this.comparing=true;this.scheduler.pause();this.monitor.endFrame(false);
+  try{
+   await this.setReferencePath(true);if(this.disposed)return;
+   const baseline=this.capturePixels();await this.setReferencePath(false);if(this.disposed)return;
+   let optimized=this.capturePixels();const regions=this.comparisonRegions();
+   const evaluate=()=>{const global=compareImages(baseline.pixels,optimized.pixels),local=regions.map(region=>({name:region.name,ssim:compareImages(baseline.pixels,optimized.pixels,region).ssim}));return {...global,regions:local,passed:global.ssim>=.999&&local.every(region=>region.ssim>=.999)};};
+   let result=evaluate();const attempts=[{path:'all optimizations',ssim:result.ssim,regions:result.regions}];
+   // Failed visual optimizations fall back on this device before the next frame.
+   if(!result.passed&&this.displayBatch.diagnostics.enabled){this.batchRejected=true;this.displayBatch.setEnabled(false);this.groundReflection?.invalidate();this.contactDirty=true;this.mirrors.invalidate();optimized=this.capturePixels();result=evaluate();attempts.push({path:'native drawing',ssim:result.ssim,regions:result.regions});}
+   if(!result.passed){setRenderSettings(this.renderer,{...renderSettings(this.renderer),staticLights:false});await this.setReferencePath(false);optimized=this.capturePixels();result=evaluate();attempts.push({path:'original light routing',ssim:result.ssim,regions:result.regions});}
+   if(!result.passed){this.cacheRejected=true;this.seatSampling.disable();await this.setReferencePath(false);this.mirrors.invalidate();optimized=this.capturePixels();result=evaluate();attempts.push({path:'original seat sampling',ssim:result.ssim,regions:result.regions});}
+   if(!result.passed){await this.setReferencePath(true);optimized=this.capturePixels();result=evaluate();attempts.push({path:'reference',ssim:result.ssim,regions:result.regions});}
+   this.comparedImages={reference:baseline.png,optimized:optimized.png};
+   this.comparison={ssim:result.ssim,passed:result.passed,regions:result.regions,maxChannelDifference:result.maxChannelDifference,width:baseline.pixels.width,height:baseline.pixels.height,modeAfterTest:this.reference?'reference':'optimized',attempts};
+   if(previous){await this.setReferencePath(true);this.comparison.modeAfterTest='reference';}
+   return this.comparison;
+  }finally{this.comparing=false;this.lastTime=performance.now();this.dirty=true;this.resumeRendering();}
+ }
+ downloadComparedImage(kind:'reference'|'optimized'){const url=this.comparedImages?.[kind];if(!url)return;const anchor=document.createElement('a');anchor.href=url;anchor.download=`${this.vehicle}-${this.view}-${kind}.png`;anchor.click();}
  private project(point:THREE.Vector3,element:HTMLElement){
   TEMP_P.copy(point).project(this.camera);element.style.left=`${(TEMP_P.x*.5+.5)*this.host.clientWidth}px`;element.style.top=`${(-TEMP_P.y*.5+.5)*this.host.clientHeight}px`;return TEMP_P.z>=-1&&TEMP_P.z<=1;
  }
@@ -795,7 +981,7 @@ export class Showroom {
   geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());
  }
  dispose(){
-  if(this.disposed)return;this.disposed=true;this.viewJourney=undefined;this.idleDeadline=Infinity;this.renderer.setAnimationLoop(null);this.size.disconnect();document.removeEventListener('visibilitychange',this.visibilityChanged);this.zoom.dispose();this.interiorLook.dispose();this.wheelMotion.dispose();this.controls.dispose();
+  if(this.disposed)return;this.disposed=true;this.scheduler.dispose();this.monitor.dispose();this.displayBatch.dispose();this.seatSampling.dispose();this.viewJourney=undefined;this.idleDeadline=Infinity;this.size.disconnect();document.removeEventListener('visibilitychange',this.visibilityChanged);this.zoom.dispose();this.interiorLook.dispose();this.wheelMotion.dispose();this.controls.dispose();
   this.renderer.domElement.removeEventListener('lostpointercapture',this.pointerCancel);window.removeEventListener('blur',this.clearInteraction);this.readyWheels.clear();
   this.renderer.domElement.removeEventListener('pointerdown',this.pointerDown);this.renderer.domElement.removeEventListener('pointerup',this.pointerUp);this.renderer.domElement.removeEventListener('webglcontextlost',this.contextLost);this.renderer.domElement.removeEventListener('webglcontextrestored',this.contextRestored);
   this.renderer.domElement.removeEventListener('pointermove',this.pointerMove);this.renderer.domElement.removeEventListener('pointercancel',this.pointerCancel);this.pickMeshes=[];this.pointers.clear();

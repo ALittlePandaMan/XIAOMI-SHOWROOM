@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import profile from './lighting-profile.json';
+import {renderSettings} from './RenderSettings';
 
 /** Fixed surrounding daylight and asymmetric reflection panels, in linear radiance. */
 export function createStudioEnvironment(settings:Omit<typeof profile,'paint'|'intensity'>=profile,width=2048){
@@ -33,7 +34,19 @@ export function excludeCabinFill(material:THREE.MeshStandardMaterial,region:'non
    bool cabinLight=abs(lightWorld.x)<3.0 && abs(lightWorld.z)<1.4 && lightWorld.y<2.5;
    bool seatLight=cabinLight && lightWorld.y>1.85;
    if(${region==='seat'?'seatLight':region==='cabin'?'cabinLight && !seatLight':'!cabinLight'}){${call}} }`;
-  const chunk=THREE.ShaderChunk.lights_fragment_begin.replace(call,filter);
+  const settings=renderSettings(renderer);
+  let selected=filter;
+  // Cabin routing includes the existing camera-space reconstruction. Preserve
+  // that path: replacing it with world-space constants failed cabin SSIM checks.
+  // Exterior/no-fill materials have no contribution from these fixed softboxes.
+  if(!settings.reference&&settings.staticLights&&(region==='none'||region==='exterior')){
+   const indices=settings.areaLights.flatMap((light,index)=>{
+    const p=light.position,cabin=Math.abs(p.x)<3&&Math.abs(p.z)<1.4&&p.y<2.5;
+    return region==='exterior'&&!cabin?[index]:[];
+   });
+   selected=indices.length?`\n#if ${indices.map(i=>`UNROLLED_LOOP_INDEX == ${i}`).join(' || ')}\n${call}\n#endif\n`:'';
+  }
+  const chunk=THREE.ShaderChunk.lights_fragment_begin.replace(call,selected);
   shader.fragmentShader=shader.fragmentShader.replace('#include <lights_fragment_begin>',chunk);
  };
 }

@@ -68,6 +68,10 @@ export class GroundReflection {
   };
  }
  invalidate(){this.dirty=true;}
+ // Run before the main GPU timer. onBeforeRender reuses this exact capture.
+ prepare(renderer:THREE.WebGLRenderer,scene:THREE.Scene,camera:THREE.Camera){
+  if(this.mesh.visible)this.mesh.onBeforeRender(renderer,scene,camera,this.mesh.geometry,this.mesh.material as THREE.Material,null as never);
+ }
  get captureCount(){return this.captures;}
  private filter(renderer:THREE.WebGLRenderer){
   const target=renderer.getRenderTarget(),face=renderer.getActiveCubeFace(),mip=renderer.getActiveMipmapLevel(),xr=renderer.xr.enabled,autoClear=renderer.autoClear;

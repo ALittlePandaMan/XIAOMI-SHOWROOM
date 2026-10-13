@@ -51,6 +51,7 @@ export class WheelMotion {
  }
  private reset(){for(const pivot of this.spinning){pivot.rotation.set(0,0,0);pivot.updateMatrix();}this.spinning=[];this.started=null;this.angle=0;}
  get active(){return this.started!==null;}
+ pauseFor(milliseconds:number){if(this.started!==null)this.started+=milliseconds;}
  update(now:number){
   if(this.started===null)return false;
   const t=Math.min(1,Math.max(0,(now-this.started)/750));this.angle=cubicInOut(t)*Math.PI*2;

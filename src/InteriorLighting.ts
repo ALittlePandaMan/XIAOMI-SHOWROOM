@@ -4,6 +4,7 @@ import {controlGlyphFunctions} from './CabinControls';
 import {seatQuiltLighting} from './SeatUpholstery';
 import {seatLeatherColor,seatSoftLighting} from './SeatLighting';
 import {cabinFixtureRegions} from './CabinFixtureDetails';
+import {seatCacheShader} from './SeatSamplingCache';
 
 /** Color correction belongs to the leather pixels, not the chrome and black inserts
  * that share the same source atlas. The atlas already contains diffuse shading. */
@@ -24,13 +25,15 @@ export function configureBrownInterior(material:THREE.MeshStandardMaterial,steer
  const seat=/座椅|坐垫/.test(material.name);
  const softSeat=standard&&seat&&[19,10027].includes(Number(material.userData.n90Atlas));
  const cleanSeatQuilting=softSeat||Number(material.userData.n90Atlas)===19||Number(material.userData.cabinAtlas)===27;
+ if(upper)material.userData.batchUnsafe=true;
+ if(cleanSeatQuilting)material.userData.seatSampling={method:softSeat||Number(material.userData.n90Atlas)===19?'pad':'quilt',ready:{value:false},texture:{value:null}};
  const inscription=material.name.endsWith('内饰_方向盘')?steeringInscription:undefined;
  const uniforms={cabinBlack:black,cabinSand:sand,cabinBaseMap:{value:material.map},cabinLeatherGain:{value:standard?(seat?1.70:1.48):(seat?1.95:1.75)},cabinLeatherTint:{value:seat?new THREE.Color(1,.84,.70):new THREE.Color(1,.90,.83)}};
  material.userData.interiorColor=uniforms;
  material.envMapIntensity=1.6;material.roughness=.44;material.color.setRGB(1,1,1);
  if(softSeat){material.roughness=.52;if(material instanceof THREE.MeshPhysicalMaterial)material.specularIntensity=.8;}
  if(material instanceof THREE.MeshPhysicalMaterial){material.clearcoat=0;material.clearcoatRoughness=.3;}
- material.onBeforeCompile=shader=>{
+ material.onBeforeCompile=(shader,renderer)=>{
   Object.assign(shader.uniforms,uniforms);
   if(upper){
    shader.vertexShader='varying float vCabinHeight;\n'+shader.vertexShader;
@@ -44,7 +47,11 @@ export function configureBrownInterior(material:THREE.MeshStandardMaterial,steer
    shader.fragmentShader='varying vec4 vCabinControl;\n'+controlGlyphFunctions+shader.fragmentShader;
   }
   shader.fragmentShader='uniform float cabinBlack,cabinSand;uniform sampler2D cabinBaseMap;uniform float cabinLeatherGain;uniform vec3 cabinLeatherTint;\n'+cabinDetailFunctions+shader.fragmentShader;
-  if(cleanSeatQuilting)shader.fragmentShader=shader.fragmentShader.replace(cabinDetailFunctions,cabinDetailFunctions+seatQuiltLighting+(softSeat?seatLeatherColor:''));
+  if(cleanSeatQuilting){
+   const cached=seatCacheShader(renderer,material);
+   shader.fragmentShader=shader.fragmentShader.replace(cabinDetailFunctions,cabinDetailFunctions+(cached??seatQuiltLighting)+(softSeat?seatLeatherColor:''));
+   if(cached){shader.uniforms.showroomSeatCacheReady=material.userData.seatSampling.ready;shader.uniforms.showroomSeatCache=material.userData.seatSampling.texture;}
+  }
   shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
    vec2 px=vMapUv*1024.0;
    ${softSeat?'vec3 seatAtlasColor=diffuseColor.rgb;':''}

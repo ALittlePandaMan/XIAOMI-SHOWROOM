@@ -18,6 +18,7 @@ export function configureStandardCabinSurface(material:THREE.MeshPhysicalMateria
  if(seat){material.envMapIntensity=1.6;material.specularIntensity=.8;material.roughness=.52;}
  if(!['leather','headliner','carpet','cargo-carpet','cargo-back','cargo-base','quilt','belt','stitch','welt'].includes(surface))return;
  material.userData.interiorColor={cabinSand:sand};
+ material.userData.batchUnsafe=true;
  material.onBeforeCompile=shader=>{
   shader.uniforms.standardCabinSand=sand;shader.uniforms.standardCabinBlack=black;
   shader.vertexShader='varying vec3 vCabinSurfacePosition;\n'+shader.vertexShader;

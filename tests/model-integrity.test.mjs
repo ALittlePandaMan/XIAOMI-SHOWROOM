@@ -6,12 +6,13 @@ import {MeshoptDecoder} from 'meshoptimizer';
 import * as THREE from 'three';
 import {freezeLocalTransforms} from '../src/StaticTransforms.ts';
 import {LampMaskBatch} from '../src/LampMaskBatch.ts';
+import {MainSceneBatch} from '../src/MainSceneBatch.ts';
 
 const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'meshopt.decoder':MeshoptDecoder}),results=[];
 for(const model of ['n70','n90-standard','n90']){
  const base=model==='n90'?'public/models/n90-explorer':`public/models/${model}`;
  const document=await io.read(`${base}/car.glb`),manifest=JSON.parse(readFileSync(`${base}/manifest.json`,'utf8'));
- const scene=new THREE.Scene(),nodes=new Map(),records=[];
+ const scene=new THREE.Scene(),nodes=new Map(),records=[],materials=new Map();
  for(const node of document.getRoot().listNodes()){
   const group=new THREE.Group();group.name=node.getName();group.userData={...node.getExtras()};
   group.position.fromArray(node.getTranslation());group.quaternion.fromArray(node.getRotation());group.scale.fromArray(node.getScale());nodes.set(node,group);
@@ -25,7 +26,8 @@ for(const model of ['n70','n90-standard','n90']){
     const accessor=target.getAttribute(semantic);if(accessor)(geometry.morphAttributes[name]??=[]).push(new THREE.BufferAttribute(new Float32Array(accessor.getArray()),accessor.getElementSize()));
    }
    geometry.morphTargetsRelative=true;
-   const source=primitive.getMaterial(),material=new THREE.MeshStandardMaterial();material.name=source?.getName()??'';material.userData={...source?.getExtras()};material.transparent=source?.getAlphaMode()==='BLEND';
+   const source=primitive.getMaterial();let material=materials.get(source);
+   if(!material){material=new THREE.MeshStandardMaterial();material.name=source?.getName()??'';material.userData={...source?.getExtras()};material.transparent=source?.getAlphaMode()==='BLEND';materials.set(source,material);}
    const mesh=new THREE.Mesh(geometry,material);group.add(mesh);records.push(mesh);
   }
  }
@@ -55,5 +57,16 @@ for(const model of ['n70','n90-standard','n90']){
  }
  results.push({model,meshes:records.length,animatedParts:tracks.length,prunedEmptyTracks:manifestTracks.length-tracks.length,sampledPoses:7,allWorldMatricesIdentical:true,batchInstances:batch.entries.length,sourceVerticesAndTrianglesIdentical:true,originalMorphParts:batch.deformed.length});
  batch.dispose();
+ const display=new MainSceneBatch();display.prepare([scene],scene,true);display.setEnabled(true);display.sync(scene);
+ assert.ok(display.diagnostics.instances>0,`${model}: no compatible opaque display instances`);
+ for(const group of display.groups)for(const entry of group.entries){
+  const source=entry.source.geometry,range=group.batch._geometryInfo[group.batch._instanceInfo[entry.instance].geometryIndex];
+  for(const [name,attribute]of Object.entries(source.attributes)){
+   const copied=group.batch.geometry.attributes[name];
+   for(let i=0;i<attribute.array.length;i++)assert.equal(copied.array[range.vertexStart*attribute.itemSize+i],attribute.array[i],`${model}/${name}: display batching changed a source value`);
+  }
+  for(let i=0;i<range.indexCount;i++)assert.equal(group.batch.geometry.index.getX(range.indexStart+i)-range.vertexStart,source.index?source.index.getX(i):i,`${model}: display triangle changed`);
+ }
+ results.at(-1).displayBatch={...display.diagnostics,allAttributesAndIndicesIdentical:true};display.dispose();
 }
 console.log(results);

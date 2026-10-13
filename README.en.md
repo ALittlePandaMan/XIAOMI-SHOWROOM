@@ -49,6 +49,8 @@ Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Models, textures, and fonts
 
 The first load downloads vehicle resources and compiles shaders. Models retain their existing detail; GPU capabilities affect frame rate.
 
+See [performance measurements](docs/performance.md) for phone testing. `?perf=1` enables local diagnostics and report export; add `reference=1` to compare the original render path.
+
 ## Commands
 
 | Command | Purpose |

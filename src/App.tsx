@@ -1,4 +1,4 @@
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {lazy,Suspense,useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {assetUrl} from './assetUrl';
 import {Outlet,useLocation,useMatch,useNavigate} from 'react-router-dom';
 import {defaults,interiors} from './config';
@@ -16,6 +16,7 @@ import type {VehicleFeatures,VehicleSelection} from './showroomLocation';
 import VehiclePicker from './VehiclePicker';
 import {readVehicle,vehicleFor,vehicleDefaults,vehicleInteriors,vehicleWheels,vehiclePaints,supportsBrushedTrim} from './vehicles';
 import type {VehicleId} from './vehicles';
+const PerformancePanel=lazy(()=>import('./PerformancePanel'));
 
 export default function App(){
  const location=useLocation(),vehicleId=readVehicle(location.search);
@@ -117,5 +118,6 @@ function VehicleShowroom({vehicleId}:{vehicleId:VehicleId}){
   {notice?<div className="toast" role="status">{notice}</div>:null}
   {!ready?<div className="loading-screen"><div className="loading-brand">{vehicle.badge}<span className={vehicle.suffix==='Pro'?'brand-pro':undefined}>{vehicle.suffix}</span></div><p>{error?'加载未完成':'正在驶入展厅'}</p>{error?<><p className="loading-error">{error}</p><button className="ghost-button" onClick={()=>setRetry(r=>r+1)}>重新加载</button></>:<><div className="loading-line"><span style={{width:`${progress}%`}}/></div><span className="loading-progress">{Math.round(progress)}%</span></>}</div>:null}
   <Outlet/>
+  {new URLSearchParams(location.search).get('perf')==='1'&&<Suspense fallback={null}><PerformancePanel viewer={viewer} ready={ready}/></Suspense>}
  </main>;
 }

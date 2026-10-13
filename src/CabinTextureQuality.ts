@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {renderSettings} from './RenderSettings';
 
 export const isCabinMaterial=(name:string)=>/内饰|中控屏|电动幕布/.test(name);
 
@@ -24,6 +25,12 @@ export function configureCabinTextureQuality(material:THREE.MeshStandardMaterial
    #ifdef USE_EMISSIVEMAP
     totalEmissiveRadiance*=cabinSample(emissiveMap,vEmissiveMapUv).rgb;
    #endif`);
+  // Displays commonly sample the same atlas twice at the same transformed UV.
+  // Reuse the exact reconstructed value; distinct maps/channels retain two reads.
+  if(!renderSettings(renderer).reference&&material.map&&material.map===material.emissiveMap&&material.map.channel===material.emissiveMap.channel){
+   shader.fragmentShader=shader.fragmentShader.replace('diffuseColor*=cabinSample(map,vMapUv);','vec4 showroomDisplaySample=cabinSample(map,vMapUv);\n diffuseColor*=showroomDisplaySample;')
+    .replace('totalEmissiveRadiance*=cabinSample(emissiveMap,vEmissiveMapUv).rgb;','totalEmissiveRadiance*=showroomDisplaySample.rgb;');
+  }
  };
 }
 

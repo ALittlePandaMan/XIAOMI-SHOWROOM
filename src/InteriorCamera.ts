@@ -43,7 +43,7 @@ export class InteriorLook {
  private targetLens=cabinLens;
  private pointers=new Map<number,{x:number;y:number}>();
  private direction=new Vector3();
- constructor(private camera:PerspectiveCamera,private element:HTMLElement,private reducedMotion:boolean){
+ constructor(private camera:PerspectiveCamera,private element:HTMLElement,private reducedMotion:boolean,private onInput:()=>void=()=>{}){
   element.addEventListener('pointerdown',this.down);element.addEventListener('pointermove',this.move);
   element.addEventListener('pointerup',this.up);element.addEventListener('pointercancel',this.up);element.addEventListener('lostpointercapture',this.up);
   element.addEventListener('wheel',this.wheel,{passive:false});element.addEventListener('keydown',this.key);
@@ -73,14 +73,16 @@ export class InteriorLook {
    const scale=2/Math.max(300,this.element.clientHeight);
    this.targetYaw+=dx*scale;this.targetPitch=MathUtils.clamp(this.targetPitch+dy*scale,-1.1,1.1);
   }else if(this.pointers.size===2){const next=this.distance();if(next>1&&distance>1)this.targetLens=MathUtils.clamp(this.targetLens*distance/next,40,88);}
+  this.onInput();
  };
  private up=(e:PointerEvent)=>{this.pointers.delete(e.pointerId)};
- private wheel=(e:WheelEvent)=>{if(!this.enabled)return;e.preventDefault();const units=e.deltaMode===1?16:e.deltaMode===2?this.element.clientHeight:1;this.targetLens=MathUtils.clamp(this.targetLens+MathUtils.clamp(e.deltaY*units,-120,120)*.08,40,88);};
+ private wheel=(e:WheelEvent)=>{if(!this.enabled)return;e.preventDefault();const units=e.deltaMode===1?16:e.deltaMode===2?this.element.clientHeight:1;this.targetLens=MathUtils.clamp(this.targetLens+MathUtils.clamp(e.deltaY*units,-120,120)*.08,40,88);this.onInput();};
  private key=(e:KeyboardEvent)=>{
   if(!this.enabled)return;
   if(e.key==='ArrowLeft')this.targetYaw-=.12;else if(e.key==='ArrowRight')this.targetYaw+=.12;
   else if(e.key==='ArrowUp')this.targetPitch=Math.min(1.1,this.targetPitch+.10);else if(e.key==='ArrowDown')this.targetPitch=Math.max(-1.1,this.targetPitch-.10);else return;
   e.preventDefault();
+  this.onInput();
  };
  update(dt:number){
   if(!this.enabled)return false;

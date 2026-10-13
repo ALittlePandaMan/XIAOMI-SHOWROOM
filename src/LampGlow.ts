@@ -61,6 +61,6 @@ export class LampGlow {
    renderer.setRenderTarget(target);renderer.autoClear=false;this.quad.material=this.composite;renderer.render(this.postScene,this.postCamera);
   }finally{renderer.setRenderTarget(target);renderer.autoClear=autoClear;renderer.shadowMap.enabled=shadow;renderer.setClearColor(clear,alpha);}
  }
- getDiagnostics(){return {captures:this.captures,...this.batch.getDiagnostics()};}
+ getDiagnostics(){return {captures:this.captures,width:this.width,height:this.height,...this.batch.getDiagnostics()};}
  dispose(){this.mask.dispose();this.ping.dispose();this.batch.dispose();this.blur.dispose();this.composite.dispose();this.quad.geometry.dispose();}
 }
