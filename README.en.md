@@ -6,6 +6,12 @@ An interactive 3D vehicle showroom built with React, TypeScript, and Three.js. E
 
 This is an independently developed, unofficial showcase. Vehicle names and trademarks belong to their respective owners.
 
+## Live demo
+
+[Open the 3D showroom](https://alittlepandaman.github.io/XIAOMI-SHOWROOM/) on a phone, tablet, or computer. No Docker installation is required.
+
+GitHub Pages hosts the static site and updates it after pushes to `main`. The first visit downloads the selected vehicle's models and textures; the device must support WebGL.
+
 ## Deploy with Docker
 
 ```bash

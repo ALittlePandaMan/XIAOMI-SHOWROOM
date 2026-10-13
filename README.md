@@ -6,6 +6,12 @@
 
 这是独立开发的非官方展示项目。车型名称与商标归其各自权利人所有。
 
+## 在线体验
+
+[打开 3D 展厅](https://alittlepandaman.github.io/XIAOMI-SHOWROOM/)，手机、平板和电脑均可直接访问，无需安装 Docker。
+
+由 GitHub Pages 静态托管，推送到 `main` 后自动更新。首次打开会下载所选车型的模型和贴图；设备需要支持 WebGL。
+
 ## Docker 快速部署
 
 ```bash

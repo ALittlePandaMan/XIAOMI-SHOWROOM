@@ -1,5 +1,28 @@
 # Deployment / 部署
 
+## GitHub Pages / 在线展厅
+
+Live site / 在线地址：[https://alittlepandaman.github.io/XIAOMI-SHOWROOM/](https://alittlepandaman.github.io/XIAOMI-SHOWROOM/)。
+
+The `Deploy GitHub Pages` workflow tests and builds pushes to `main`, then publishes the complete site. Pull requests validate the Pages build without publishing. Pages is configured to use GitHub Actions; no additional secrets are needed.
+
+推送到 `main` 后，Pages 工作流自动测试、构建并发布完整网站。PR 只验证、不发布。仓库 Pages 的发布来源设为 GitHub Actions，不需要额外 Secret。其他设备直接访问上述 HTTPS 地址即可，本机无需保持开机。
+
+Vite's base path, browser routing, and model/texture URLs use the Pages deployment path. Separate `exterior/index.html` and `interior/index.html` entry files support refreshes and shared links while retaining query parameters and color configuration hashes.
+
+构建会适配仓库子路径，并生成外观、内饰的静态入口，因此直接打开和刷新分享链接均可访问，车型与配色参数会保留。
+
+To build the same files locally (Bash) / 在本地生成相同的静态文件（Bash）：
+
+```bash
+VITE_BASE_PATH=/XIAOMI-SHOWROOM/ npm run build:pages
+node scripts/check-pages.mjs /XIAOMI-SHOWROOM/
+```
+
+For a fork, enable Settings → Pages → GitHub Actions and run the Pages workflow. It reads the deployment path from GitHub. Docker and ordinary `npm run build` deployments use `/` by default.
+
+Fork 后，在 Settings → Pages 中选择 GitHub Actions，再运行 Pages 工作流。部署路径会从 GitHub 读取。Docker 和普通构建默认继续使用根路径 `/`。
+
 ## Published Docker image / 已发布镜像
 
 ```bash
@@ -120,9 +143,9 @@ Deploy the complete `dist/` directory. The app is a static site with no backend 
 
 ## Routes and hosting / 路由与托管
 
-The current app uses absolute asset URLs and BrowserRouter. Host it at a domain root. Serve `/models/`, `/textures/`, `/environments/`, `/fonts/`, `/images/`, and `/icons/` as files; route page requests to `index.html`.
+The default build uses BrowserRouter at a domain root. Serve `/models/`, `/textures/`, `/environments/`, `/fonts/`, `/images/`, and `/icons/` as files; route page requests to `index.html`. For a subdirectory, set `VITE_BASE_PATH` to its absolute path with a trailing slash before building.
 
-当前使用根路径资源 URL 和 BrowserRouter，适合部署至域名根目录。静态资源按文件提供，页面路由回退至 `index.html`。
+默认构建使用根路径和 BrowserRouter。静态资源按文件提供，页面路由回退至 `index.html`。部署到子目录时，构建前设置带前后斜杠的 `VITE_BASE_PATH`。
 
 Example Nginx server locations / Nginx 路由示例：
 
@@ -139,9 +162,9 @@ location / {
 }
 ```
 
-GitHub repository hosting and your running server are separate. The workflow publishes images and release files; it does not connect to your server. A GitHub Pages project URL such as `/XIAOMI-SHOWROOM/` would additionally require changes to the router and all absolute asset URLs.
+The Docker/Release workflow publishes images and downloads without connecting to your server. The separate Pages workflow deploys the live website on GitHub.
 
-工作流发布镜像和 Release，不会连接并修改你的服务器。若部署到 GitHub Pages 的仓库子路径，需要另外适配路由和资源路径。
+Docker/Release 工作流发布镜像及下载文件，不会修改你的服务器；独立的 Pages 工作流负责发布 GitHub 上的在线网站。
 
 ## Assets and caching / 资源与缓存
 

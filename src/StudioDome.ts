@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {assetUrl} from './assetUrl';
 import {loadLosslessBinary} from './LosslessRadiance';
 
 /** World-space backdrop. It supplies the horizon in every camera and mirror view. */
@@ -26,7 +27,7 @@ export function createStudioDome(){
 }
 
 export async function loadStudioRadiance(name:'studio'|'paint'|'glass'|'wheel'|'wheel-glass'|'window-trim'){
- const path=`/environments/${name}`;
+ const path=assetUrl(`/environments/${name}`);
  const [metadataResponse,buffer]=await Promise.all([fetch(`${path}.json`),loadLosslessBinary(`${path}.rgba16f`,`${path}.rgba16f.gz`)]);
  if(!metadataResponse.ok)throw new Error('展厅环境载入失败');
  const meta=await metadataResponse.json() as {width:number;height:number;flipY:boolean};

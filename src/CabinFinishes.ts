@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {assetUrl} from './assetUrl';
 import type {InteriorId} from './config';
 
 // The source model ships paired, UV-identical 1024² atlases. Keep both originals;
@@ -22,7 +23,7 @@ export class CabinFinishes {
    {id:10027,url:'/textures/n70/cabin-28.png'},
   );
   await Promise.all(atlases.map(async ({id,url})=>{
-   const texture=await loader.loadAsync(url);
+   const texture=await loader.loadAsync(assetUrl(url));
    if(this.disposed){texture.dispose();return;}
    texture.name=`@ME9x1tr5_${id+1}`;this.variants.set(id,texture);
   }));

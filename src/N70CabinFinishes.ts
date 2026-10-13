@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {assetUrl} from './assetUrl';
 import type {InteriorId} from './config';
 
 /** Three original N70 atlas sets, all loaded at their supplied resolution. */
@@ -13,7 +14,7 @@ export class N70CabinFinishes {
   const loader=new THREE.TextureLoader();
   const ids=Array.from({length:11},(_,i)=>5+i*3).flatMap(i=>[i,i+2]);
   const results=await Promise.allSettled(ids.map(async id=>{
-   const t=await loader.loadAsync(`/textures/n70/cabin-${id}.png`);
+   const t=await loader.loadAsync(assetUrl(`/textures/n70/cabin-${id}.png`));
    if(this.disposed)t.dispose();else this.maps.set(id,t);
   }));
   const error=results.find(r=>r.status==='rejected');if(error?.status==='rejected')throw error.reason;

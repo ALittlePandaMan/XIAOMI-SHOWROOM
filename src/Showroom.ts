@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {assetUrl} from './assetUrl';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {ElasticZoom} from './ElasticZoom';
 import {InteriorLook,cabinEye,cabinLens,cabinRotation,doorApproach,doorPath,doorRotation,responsiveLens,seatCamera,cabinPath} from './InteriorCamera';
@@ -91,7 +92,7 @@ export class Showroom {
  private tireFinish=new TireFinish();
  private cabinFinishes=new CabinFinishes();
  private n70CabinFinishes=new N70CabinFinishes();
- private get modelBase(){return `/models/${vehicleAssets(this.vehicle)}`}
+ private get modelBase(){return assetUrl(`/models/${vehicleAssets(this.vehicle)}`)}
  private tracks:Record<'doors'|'trunk'|'roof',Track[]>={doors:[],trunk:[],roof:[]};
  private openingTracks:Record<OpeningId|'boardLeft'|'boardRight',Track[]>={frontLeft:[],frontRight:[],rearLeft:[],rearRight:[],trunk:[],boardLeft:[],boardRight:[]};
  private openingTargets=closedOpenings();
@@ -296,7 +297,7 @@ export class Showroom {
   const manifestPromise=fetch(`${this.modelBase}/manifest.json`).then(r=>{if(!r.ok)throw new Error('模型索引加载失败');return r.json() as Promise<Manifest>});
   const carPromise=this.loader.loadAsync(`${this.modelBase}/car.glb`,e=>{if(!this.disposed)this.callbacks.onProgress(e.total?Math.min(88,e.loaded/e.total*88):20)});
   const projectorPromise=this.vehicle==='n90'?this.loader.loadAsync(`${this.modelBase}/projector.glb`):Promise.resolve(undefined);
-  const inscriptionPromise=new THREE.TextureLoader().loadAsync('/textures/cabin/steering-wordmark.svg');
+  const inscriptionPromise=new THREE.TextureLoader().loadAsync(assetUrl('/textures/cabin/steering-wordmark.svg'));
   const tireMaps=this.tireFinish.load(Math.min(16,this.renderer.capabilities.getMaxAnisotropy()));
   const availableWheels=vehicleWheels(this.vehicle);
   const wheelsPromise=Promise.all(availableWheels.map(({id})=>this.loadWheel(id,tireMaps)));
@@ -384,7 +385,7 @@ export class Showroom {
  }
  private loadWheel(id:WheelId,tireMaps:Promise<void>){
   let promise=this.wheelCache.get(id);
-  if(!promise){promise=Promise.all([this.loader.loadAsync(`/models/shared/wheels-${id}.glb`),tireMaps]).then(([gltf])=>{
+  if(!promise){promise=Promise.all([this.loader.loadAsync(assetUrl(`/models/shared/wheels-${id}.glb`)),tireMaps]).then(([gltf])=>{
    if(this.disposed){this.disposeTree(gltf.scene);return gltf.scene;}
    this.prepare(gltf.scene,true);
    const mounts=this.vehicle==='n90'?undefined:wheelFitments[isN70(this.vehicle)?'n70':'n90-standard'];

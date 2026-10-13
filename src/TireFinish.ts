@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {assetUrl} from './assetUrl';
 
 /** Public showroom surface maps, restored to the local tires' original UV layout. */
 export class TireFinish {
@@ -7,7 +8,7 @@ export class TireFinish {
  async load(anisotropy:number){
   const loader=new THREE.TextureLoader();
   const paths=['front-detail.png','rear-detail.png','rubber-occlusion.png'];
-  const loaded=await Promise.allSettled(paths.map(p=>loader.loadAsync(`/textures/tires/${p}`)));
+  const loaded=await Promise.allSettled(paths.map(p=>loader.loadAsync(assetUrl(`/textures/tires/${p}`))));
   const textures=loaded.flatMap(r=>r.status==='fulfilled'?[r.value]:[]);
   const failure=loaded.find(r=>r.status==='rejected');
   if(this.disposed||failure){textures.forEach(t=>t.dispose());if(failure?.status==='rejected')throw failure.reason;return;}
