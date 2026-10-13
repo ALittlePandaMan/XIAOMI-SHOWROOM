@@ -13,7 +13,8 @@ trap cleanup EXIT
 
 port="$(docker port "$container" 8080/tcp | awk -F: 'NR==1 {print $NF}')"
 base="http://127.0.0.1:$port"
-curl --fail --silent --show-error --retry 30 --retry-delay 1 --retry-connrefused "$base/healthz"
+# A published port can reset connections briefly before Nginx finishes starting.
+curl --fail --silent --show-error --max-time 3 --retry 30 --retry-delay 1 --retry-all-errors "$base/healthz"
 test "$(docker exec "$container" id -u)" != 0
 docker exec "$container" nginx -t
 
