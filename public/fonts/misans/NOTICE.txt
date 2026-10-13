@@ -1,0 +1,9 @@
+本软件使用小米 MiSans VF 字体。
+This software uses MiSans VF by Xiaomi.
+
+Font source: https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify,Latin&display=swap
+Official website: https://hyperos.mi.com/font/zh/
+License: https://hyperos.mi.com/font/zh/download/
+Local license: LICENSE.pdf
+
+The original WOFF2 font files are included unchanged for this application. Unicode ranges are preserved from Xiaomi’s published stylesheet.

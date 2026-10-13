@@ -1,0 +1,106 @@
+{
+  "reference": "https://show.xiaomiev.com/v2/showroom?itemId=510036425189&ssuId=610085836993&source=pcn90maxstudiohomepage",
+  "captured": "2026-10-06",
+  "assets": [
+    {
+      "path": "/icons/official/arrowback.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/icons/arrowback.svg",
+      "sha256": "b1154cb8aad97d67d1c2f429fc4f5d3e7ef48f09aee4bd535c2740abbb8d0198"
+    },
+    {
+      "path": "/icons/official/roofOpen.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/kunlun/icons/roofOpen.svg",
+      "sha256": "c0278a7e77cff4aef49bd6216f2c0f435068e2152b1aebb42d0c0ac826e646a9"
+    },
+    {
+      "path": "/icons/official/roofClose.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/kunlun/icons/roofClose.svg",
+      "sha256": "ccfc18483aa3030aa29b7da23b94dc1cb2738896e5ec40e8ceafcce489e779bd"
+    },
+    {
+      "path": "/icons/official/doorOpen.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/kunlun/icons/doorOpen.svg",
+      "sha256": "f333b408a5ab2d8812894535b5764428e55259132c5f2132bf4a24f961f894a3"
+    },
+    {
+      "path": "/icons/official/doorClose.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/kunlun/icons/doorClose.svg",
+      "sha256": "25cdf0faf287feda1da68d547cac50f31a89294521f8ec22ed1311fa97809122"
+    },
+    {
+      "path": "/icons/official/noRule.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/kunlun/icons/noRule.svg",
+      "sha256": "0b9d6e492f90f0f5e76c0c3c852f24f7d36ff52ce17df60de3611eb4b703027b"
+    },
+    {
+      "path": "/icons/official/rule.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/kunlun/icons/rule.svg",
+      "sha256": "17047ea7e66cb614541a4640944fa600e2fa641d5da9237c4141ac55a651d50a"
+    },
+    {
+      "path": "/icons/official/fullScreen.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/kunlun/icons/fullScreen.svg",
+      "sha256": "49e9c2f3193c6cb0334364553a587b880614218c19f02343a0dcb4b0d133764a"
+    },
+    {
+      "path": "/icons/official/closeFullScreen.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/kunlun/icons/closeFullScreen.svg",
+      "sha256": "06a7b749ca5060ba27a6e49c234322eee0972135f91535dd51c523628e1e9c91"
+    },
+    {
+      "path": "/icons/official/reset.svg",
+      "source": "https://s1.xiaomiev.com/activity-outer-assets/virtualroom/kunlun/icons/reset.svg",
+      "sha256": "a4882dcb041cbd459bf8ce0135b0f0dea09ec14ba09e66db611bb77d4301c3d6"
+    },
+    {
+      "path": "/images/official/paint-teal.png",
+      "source": "https://s1.xiaomiev.com/remote-config/theme/20260907/c232c9a9afc045bf6922ead08ab6a158-file1788763204279.png",
+      "sha256": "66bd6bc31de038d71fd812595f2b913d3b12e6289d81fdd46dc5e5f184838781"
+    },
+    {
+      "path": "/images/official/paint-blue.png",
+      "source": "https://s1.xiaomiev.com/remote-config/theme/20260907/6d13b94c927f09014bb1628360f7e19a-file1788763204279.png",
+      "sha256": "c8a42fd58c32e1f29f990550af3bc2dad9c278f06f4d7662f41b051cf02a59b3"
+    },
+    {
+      "path": "/images/official/paint-graphite.png",
+      "source": "https://s1.xiaomiev.com/remote-config/theme/20260907/b883192b941aadeaae18daee073b4f37-file1788763204279.png",
+      "sha256": "f4d07e7465add3781b03aab68d25d3c46c22b40b7b0bc11587b53706dace0817"
+    },
+    {
+      "path": "/images/official/paint-khaki.png",
+      "source": "https://s1.xiaomiev.com/remote-config/theme/20260907/d3ad249e906a2b2a6ce3873ad5ffbecf-file1788763204279.png",
+      "sha256": "a1e11ff3a701af6ce1f0fb6cac456219a8739263921d2b724de5c80d13b49f76"
+    },
+    {
+      "path": "/images/official/wheel-3.png",
+      "source": "https://s1.xiaomiev.com/remote-config/theme/20260907/29eaf6dd73d7d266724be32813db2173-file1788763213900.png",
+      "sha256": "94df5f914f0b2183f5fab7d3446ceed00126e6418bbe225fa06242eac4b7915c"
+    },
+    {
+      "path": "/images/official/wheel-1.png",
+      "source": "https://s1.xiaomiev.com/remote-config/theme/20260907/aed67ff3808ef012eb99a6e225f63263-file1788763213900.png",
+      "sha256": "1961bdbc1734490ea4ea1966d7bc5910e0a84ee5ca5c689d152ba86c372150fc"
+    },
+    {
+      "path": "/images/official/wheel-2.png",
+      "source": "https://s1.xiaomiev.com/remote-config/theme/20260907/5542951327992fc88a3c1d2b6bfb377b-file1788763213901.png",
+      "sha256": "6ee16717fe3935a979ede755143a7603c2b916f1c1672a2c6e5506ddf7954d7e"
+    },
+    {
+      "path": "/images/official/trim-body.png",
+      "source": "https://s1.xiaomiev.com/remote-config/theme/20260907/f6ede54c40b42bacb761723ce205286c-file1788763221969.png",
+      "sha256": "93f198b6542fe424583e4d1cad80c8f06e078925a7bf0437fd46355dc9b79f6b"
+    },
+    {
+      "path": "/images/official/trim-brushed.png",
+      "source": "https://s1.xiaomiev.com/remote-config/theme/20260907/f3802c24ce57aca18de89dbb7a77e533-file1788763221969.png",
+      "sha256": "995e55aefa81e2a9513e5980cbb89b1e8df6acab2f318b47b0fac4247caee861"
+    },
+    {
+      "path": "/favicon.ico",
+      "source": "https://s01.mifile.cn/favicon.ico",
+      "sha256": "e59b4a96433a0b039f223dd98100b9b0edcda6fe7d96f74808bc5fda41a44ca7"
+    }
+  ]
+}

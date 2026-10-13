@@ -1,0 +1,108 @@
+{
+  "teal": {
+    "ambient": 2.904,
+    "environment": 1.026,
+    "rotation": [
+      0.1125,
+      0,
+      0
+    ],
+    "tint": [
+      0.94375,
+      1,
+      0.85
+    ],
+    "sideFill": 0.044
+  },
+  "blue": {
+    "ambient": 3.05,
+    "environment": 1.25,
+    "rotation": [
+      0.0375,
+      -0.03,
+      -0.06
+    ],
+    "tint": [
+      0.94375,
+      1,
+      0.94375
+    ],
+    "sideFill": 0.08
+  },
+  "graphite": {
+    "ambient": 1.8,
+    "environment": 0.725,
+    "rotation": [
+      0.045,
+      -0.015,
+      -0.0525
+    ],
+    "tint": [
+      0.875,
+      0.95,
+      1.017
+    ],
+    "sideFill": 0.085
+  },
+  "khaki": {
+    "ambient": 4.8,
+    "environment": 1.05,
+    "rotation": [
+      0.0525,
+      -0.03,
+      -0.06
+    ],
+    "tint": [
+      0.925,
+      1,
+      1
+    ],
+    "sideFill": 0.055
+  },
+  "black": {
+    "ambient": 1.8,
+    "environment": 0.725,
+    "rotation": [
+      0.045,
+      -0.015,
+      -0.0525
+    ],
+    "tint": [
+      1,
+      1,
+      1
+    ],
+    "sideFill": 0.085,
+    "chroma": 0.035
+  },
+  "white": {
+    "ambient": 4.8,
+    "environment": 1.05,
+    "rotation": [
+      0.0525,
+      -0.03,
+      -0.06
+    ],
+    "tint": [
+      0.925,
+      1,
+      1
+    ],
+    "sideFill": 0.055
+  },
+  "wine": {
+    "ambient": 3.05,
+    "environment": 1.25,
+    "rotation": [
+      0.0375,
+      -0.03,
+      -0.06
+    ],
+    "tint": [
+      0.94375,
+      1,
+      0.94375
+    ],
+    "sideFill": 0.08
+  }
+}

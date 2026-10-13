@@ -1,0 +1,14 @@
+{
+  "width": 512,
+  "height": 256,
+  "type": 1016,
+  "format": 1023,
+  "flipY": true,
+  "rotation": [
+    0,
+    1.8,
+    0,
+    "XYZ"
+  ],
+  "compression": "gzip"
+}

@@ -1,0 +1,154 @@
+@import "tailwindcss";
+@import "./fonts.css";
+.showroom .header{z-index:35;pointer-events:none}
+.header .vehicle-picker,.header .top-nav{pointer-events:auto}
+.vehicle-picker{position:relative}
+.vehicle-trigger{background:transparent;padding:4px 0;min-height:32px}
+.vehicle-trigger .brand-max{margin-left:.18em}
+.vehicle-chevron{align-self:center;margin-left:4px;opacity:.75;transition:transform .2s}
+.vehicle-trigger[aria-expanded="true"] .vehicle-chevron{transform:rotate(180deg)}
+.vehicle-drawer{position:fixed;inset:0 auto 0 0;margin:0;padding:0;width:clamp(320px,19.6vw,500px);max-width:calc(100vw - 32px);height:100%;height:100dvh;max-height:none;border:0;border-right:1px solid #ffffff13;color:#f1f3f4;background:linear-gradient(180deg,rgba(54,64,76,.73),rgba(83,87,91,.66) 47%,rgba(7,11,14,.92));backdrop-filter:blur(20px);overflow:hidden}
+.vehicle-drawer[open]{display:flex;flex-direction:column;animation:vehicle-drawer-in .24s cubic-bezier(.2,.7,.2,1) both}
+.vehicle-drawer::backdrop{background:rgba(0,0,0,.04)}
+.vehicle-drawer-header{position:relative;display:flex;flex:none;align-items:center;justify-content:center;height:82px;padding:20px 58px}
+.vehicle-drawer-header h2{margin:0;font-size:16px;font-weight:550;line-height:1.4}
+.vehicle-drawer-close{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:40px;height:40px;padding:8px;background:transparent;color:#e1e5e8}
+.vehicle-drawer-close:hover{color:#fff}
+.vehicle-drawer-columns{display:grid;grid-template-columns:45% 55%;flex:1;min-height:0;overflow:auto}
+.vehicle-families{border-right:1px solid #ffffff16}
+.vehicle-families button{display:block;width:100%;min-height:44px;padding:11px 18px;font-size:16px;line-height:22px;background:transparent;color:#ffffffb3;text-align:center}
+.vehicle-families button[aria-selected="true"]{background:#17212b33;color:#fff}
+.vehicle-options{padding:0 0 24px}
+.vehicle-options button{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 7px;width:100%;min-height:48px;padding:10px 20px;background:transparent;text-align:left;color:#ffffffba}
+.vehicle-option-name{font-size:20px;line-height:28px;letter-spacing:-.5px;white-space:nowrap}
+.vehicle-option-name .brand-max{margin-left:3px}
+.brand-pro{margin-left:3px;font-weight:400}
+.loading-brand .brand-pro{color:inherit;font-weight:300}
+.vehicle-option-edition{font-size:13px;line-height:20px;white-space:nowrap}
+.vehicle-options button[aria-pressed="true"]{color:#fff}
+.vehicle-options button:hover,.vehicle-families button:hover{background:#ffffff0c;color:#fff}
+.vehicle-drawer button:focus-visible{outline:1px solid #e7f8ff;outline-offset:-4px}
+@keyframes vehicle-drawer-in{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+@media(max-width:440px){.vehicle-trigger{gap:5px}.vehicle-chevron{margin-left:1px}.vehicle-drawer{width:340px}.vehicle-drawer-header{height:76px}.vehicle-drawer-close{right:12px}.vehicle-options button{padding:10px 14px}.vehicle-option-name{font-size:19px}}
+html,body,#root{width:100%;height:100%;overflow:hidden}
+:root{font-family:"MiSans VF","MiSans","Microsoft YaHei","PingFang SC",sans-serif;color:#f5f5f3;background:#89949e;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}*{box-sizing:border-box}body{margin:0}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;color:inherit;cursor:pointer}button:disabled{cursor:wait;opacity:.45}button:focus-visible,a:focus-visible{outline:2px solid #e7f8ff;outline-offset:6px}button{border:0}a{text-decoration:none;color:inherit}canvas{display:block;width:100%;height:100%}.stage-shade{background:linear-gradient(180deg,rgba(16,27,41,.59),transparent 15%,transparent 72%,rgba(5,8,10,.2) 82%,rgba(4,6,8,.92) 100%)}.header{z-index:10;padding:30px 35px}.brand{display:flex;align-items:baseline;gap:7px;white-space:nowrap}.brand>span:first-child{font-size:20px;letter-spacing:-.5px;font-weight:500}.brand-max{color:#e5433c;letter-spacing:-.5px;font-weight:450}.brand-edition{font-size:13px;letter-spacing:1px;color:#e2e7e9}.brand-exterior{font-size:10px;border:1px solid #ffffff36;padding:2px 5px;border-radius:3px;color:#d2dbe0;letter-spacing:1px;margin-left:5px}.top-nav{position:absolute;left:50%;transform:translateX(-50%);gap:34px;font-size:14px;font-weight:330;line-height:1}.top-nav button{display:block;padding:11px 0;background:transparent;color:#ffffff65}.top-nav button.nav-active{color:#fff}.nav-active{font-weight:450;position:relative}.nav-active:after{content:"";position:absolute;height:1.5px;background:#fff;width:100%;bottom:0;left:0}.nav-disabled{color:#ffffff65;cursor:default}.ghost-button{padding:10px 17px;font-size:12px;border-radius:3px;transition:background .2s;display:inline-flex;gap:15px;align-items:center;justify-content:center}.ghost-button{background:#ffffff20}.ghost-button:hover{background:#ffffff35}.drag-hint{position:absolute;left:50%;bottom:124px;transform:translateX(-50%);font-size:10px;letter-spacing:1.5px;color:#ffffff65;opacity:0;pointer-events:none}.drag-hint span{padding:0 9px}.drag-hint.shown{animation:hint-out 8s both}.wheel-spinner{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:white;animation:spin .7s linear infinite}.toast{position:absolute;left:50%;bottom:142px;transform:translateX(-50%);z-index:40;background:#10181eeb;border:1px solid #ffffff29;backdrop-filter:blur(15px);border-radius:5px;padding:14px 23px;font-size:12px;max-width:90%;text-align:center}.loading-screen{position:absolute;inset:0;z-index:30;background:linear-gradient(160deg,#465665,#1c252e);display:flex;align-items:center;justify-content:center;flex-direction:column}.loading-brand{font-size:44px;font-weight:300;letter-spacing:-1px}.loading-brand span{color:#ee6a53}.loading-screen>p{font-size:12px;letter-spacing:4px;color:#c0cbd3;margin:24px 0}.loading-line{height:1px;width:210px;background:#ffffff25;overflow:hidden}.loading-line span{display:block;height:100%;background:#e5edf1;transition:width .35s}.loading-progress{font-size:11px;letter-spacing:2px;margin-top:15px;color:#a9b9c4}.loading-error{max-width:360px;line-height:1.9;letter-spacing:0!important;text-align:center}.dimension-label{position:absolute;color:#ffffff;font-size:clamp(11px,2vh,20px);font-weight:600;text-shadow:0 1px 2px #141b2540;transform:translate(-50%,-50%);pointer-events:none;white-space:nowrap}@keyframes spin{to{transform:rotate(360deg)}}@keyframes hint-out{0%{opacity:0}15%,70%{opacity:1}100%{opacity:0}}@media(min-width:1600px){.header{padding:32px 38px}.top-nav{gap:38px}}@media(max-width:1100px){.brand-exterior{display:none}.header{padding:23px}.top-nav{gap:23px}}@media(max-width:800px){.header{padding:20px}.top-nav{position:static;transform:none;display:flex;gap:24px}.brand>span:first-child{font-size:19px}.brand-edition{font-size:12px}.drag-hint{bottom:186px;font-size:9px}.toast{bottom:186px}}@media(max-width:440px){.brand-exterior{display:none}.header{padding:20px 18px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.drag-hint.shown{opacity:.65}}
+
+
+/* Exact public showroom icon sizes and toolbar states (icons-2026-10-06). */
+.showroom>.loading-screen{position:fixed}
+.showroom-icon{display:block;flex:none;object-fit:contain;pointer-events:none;user-select:none}
+
+.utility-tools{display:contents}
+.control-panel{position:absolute;z-index:8;display:flex;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:4px}
+.left-tools{left:2vw;bottom:calc(2vw + 20px);align-items:center;padding:5px 8px}
+.control-panel i{display:block;flex:none;width:1px;height:18px;margin:0 7.5px;background:rgba(255,255,255,.1)}
+.tool{display:flex;flex:none;width:30px;height:30px;align-items:center;justify-content:center;padding:0;background:transparent;position:relative}
+.tool:hover,.tool.active{background:transparent}
+.right-tools{right:2vw;bottom:2vw;flex-direction:column;gap:16px;padding:8px 5px}
+.configuration{position:absolute;bottom:2vw;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:flex-start;gap:28px;opacity:0;transition:opacity .7s}
+.configuration.loaded{opacity:1}
+.option-group{display:flex;gap:10px}
+.option{position:relative;display:flex;justify-content:center;padding-bottom:20px}
+.swatch,.wheel-swatch,.trim-swatch{height:42px;width:42px;flex:none;border-radius:50%;padding:2px;border:1px solid transparent;background:transparent;position:relative;transition:border-color .2s}
+.swatch.selected,.wheel-swatch.selected,.trim-swatch.selected{border-color:rgba(255,255,255,.9)}
+.swatch>img,.wheel-swatch>img,.trim-swatch>img{display:block;width:100%;height:100%;border-radius:50%;object-fit:contain;filter:none;pointer-events:none;user-select:none}
+.option-label{position:absolute;bottom:0;font-size:11px;font-weight:330;line-height:12px;white-space:nowrap;opacity:0;color:rgba(255,255,255,.9);pointer-events:none}
+.option-label.visible{opacity:1}
+.option-divider{height:16px;width:1px;flex:none;background:rgba(255,255,255,.3);margin-top:13px}
+@media(min-width:801px){.header{padding:29px 2vw 0}}
+@media(max-width:1100px) and (min-width:801px){.configuration{gap:19px}.option-group{gap:8px}.swatch,.wheel-swatch,.trim-swatch{width:38px;height:38px}.option-label{font-size:11px}}
+@media(max-width:800px){
+ .configuration{width:max-content;max-width:calc(100% - 24px);justify-content:center;gap:14px;bottom:calc(24px + env(safe-area-inset-bottom))}
+ .option-group{position:relative;gap:8px}.option{position:static}.option-label{left:50%;transform:translateX(-50%);font-size:10px}
+ .swatch,.wheel-swatch,.trim-swatch{width:35px;height:35px}.option-divider{margin-top:9px}
+ .utility-tools{position:absolute;left:50%;bottom:calc(125px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:8;display:flex;align-items:center;gap:14px}
+ .utility-tools .control-panel{position:static}
+ .right-tools{flex-direction:row;padding:5px 8px}
+}
+@media(max-width:440px){.configuration{gap:10px}.option-group{gap:3px}.swatch,.wheel-swatch,.trim-swatch{width:32px;height:32px}.option-label{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.configuration,.swatch,.wheel-swatch,.trim-swatch{transition:none}}
+
+@media(max-width:360px){.configuration{gap:6px}.option-group{gap:2px}.swatch,.wheel-swatch,.trim-swatch{width:28px;height:28px}.option-label{font-size:8px}.option-divider{margin-top:6px}}
+
+.configuration.transitioning{pointer-events:none;opacity:.35}
+.showroom[data-view="interior"] .stage-shade{background:linear-gradient(180deg,rgba(16,27,41,.48),transparent 15%,transparent 85%,rgba(4,6,8,.3))}
+
+.interior-toolbar{display:contents}
+.interior-seats{left:2vw;bottom:calc(2vw + 20px);align-items:center;padding:2px}
+.interior-seats button{position:relative;padding:8px 16px;background:transparent;font-size:12px;font-weight:330;line-height:18px;color:#ffffff80;white-space:nowrap}
+.interior-seats button+button:before{content:"";position:absolute;left:0;top:11px;height:12px;width:1px;background:#ffffff24}
+.interior-seats button[aria-pressed="true"]{color:#fff;font-weight:450}
+.interior-colors{position:absolute;z-index:9;left:50%;transform:translateX(-50%);bottom:2vw}
+@media(max-width:800px){
+ .interior-colors{bottom:calc(82px + env(safe-area-inset-bottom))}
+}
+
+/* Keep each configuration group intact when the full row no longer fits.
+   The six-colour N90 needs more space than N70; shrinking the buttons hid
+   the first paint and the last trim option beyond the viewport. */
+.showroom{height:100dvh;--edge-left:max(12px,env(safe-area-inset-left));--edge-right:max(12px,env(safe-area-inset-right));--edge-bottom:max(12px,env(safe-area-inset-bottom))}
+.vehicle-drawer{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left)}
+.vehicle-drawer-close{width:44px;height:44px}
+.vehicle-trigger,.top-nav button{min-height:44px}
+.top-nav button{min-width:44px}
+@media(max-width:1100px){
+ .header{padding:max(12px,env(safe-area-inset-top)) var(--edge-right) 0 var(--edge-left);gap:12px}
+ .exterior-toolbar .utility-tools{position:absolute;left:50%;bottom:calc(104px + var(--edge-bottom));transform:translateX(-50%);z-index:8;display:flex;align-items:center;gap:12px}
+ .exterior-toolbar .utility-tools .control-panel{position:static}
+ .exterior-toolbar .right-tools{flex-direction:row;gap:4px;padding:4px}
+ .exterior-toolbar .left-tools{padding:4px}
+ .control-panel i{margin:0 3px}
+ .tool{width:44px;height:44px}
+ .interior-seats button{min-height:44px;padding:10px 14px}
+ .interior-seats button+button:before{top:16px}
+ .configuration{bottom:var(--edge-bottom)}
+}
+/* Seat navigation only shares a row with actions on compact screens. Desktop
+   keeps the official left / centre / right arrangement and bottom offsets. */
+@media(max-width:800px), (max-height:500px) and (max-width:1100px){
+ .interior-toolbar{position:absolute;z-index:9;display:flex;align-items:center;gap:12px;left:50%;bottom:var(--edge-bottom);transform:translateX(-50%);width:max-content;max-width:calc(100% - var(--edge-left) - var(--edge-right))}
+ .interior-toolbar .interior-seats{position:static;transform:none}
+ .interior-toolbar .utility-tools{position:static;display:flex;transform:none;max-width:none}
+ .interior-toolbar .right-tools{position:static;flex-direction:row;gap:4px;padding:2px}
+ .interior-toolbar .tool{width:44px;height:44px}
+ .interior-colors{bottom:calc(70px + var(--edge-bottom))}
+}
+@media(max-width:600px){
+ .header{align-items:flex-start}
+ .top-nav{flex:none;gap:4px;padding-top:0}
+ .brand{gap:4px}
+ .brand>span:first-child{font-size:18px}
+ .brand-edition{font-size:11px;letter-spacing:0}
+ .vehicle-chevron{width:12px;margin-left:0}
+ .configuration{left:var(--edge-left);right:var(--edge-right);width:auto;max-width:none;transform:none;display:grid;grid-template-columns:max-content max-content;justify-content:center;column-gap:22px;row-gap:12px}
+ .configuration>.paint-group{grid-column:1/-1;justify-content:center;gap:4px}
+ .configuration>.option-divider{display:none}
+ .configuration>.wheel-group{grid-column:1;justify-content:center}
+ .configuration>.trim-group{grid-column:2;justify-content:center}
+ .configuration>.option-group{position:relative}
+ .option-group{gap:4px}
+ .option{position:static;padding-bottom:20px}
+ .swatch,.wheel-swatch,.trim-swatch{width:44px;height:44px;padding:4px}
+ .option-label{left:50%;transform:translateX(-50%);font-size:11px;line-height:16px}
+ .exterior-toolbar .utility-tools{bottom:calc(156px + var(--edge-bottom));gap:8px;max-width:calc(100% - 24px)}
+ .interior-toolbar{gap:8px}
+ .toast{bottom:calc(220px + var(--edge-bottom));max-width:calc(100% - 24px);width:max-content;padding:12px 16px}
+ .loading-error{max-width:calc(100% - 32px)}
+}
+@media(max-height:500px) and (min-width:601px) and (max-width:1100px){
+ .header{padding-top:max(4px,env(safe-area-inset-top))}
+ .configuration{gap:12px}
+ .configuration .option-group{gap:4px}
+ .configuration .swatch,.configuration .wheel-swatch,.configuration .trim-swatch{width:40px;height:40px;padding:3px}
+ .configuration .option-label{font-size:10px}
+ .exterior-toolbar .utility-tools{bottom:calc(78px + var(--edge-bottom))}
+ .interior-colors .swatch{width:40px;height:40px}
+ .toast{bottom:calc(138px + var(--edge-bottom))}
+}
+@media(max-width:440px){
+ .interior-toolbar .interior-seats button{font-size:11px;min-width:40px;padding:10px 4px}
+ .interior-toolbar .right-tools{gap:0}
+}
+@media(max-width:360px){
+ .interior-toolbar .tool{width:36px}
+}

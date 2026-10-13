@@ -1,0 +1,14 @@
+Reference environment radiance for the local N90 Max reconstruction.
+Source page: https://show.xiaomiev.com/v2/showroom?itemId=510036425189&ssuId=610085836993&source=pcn90maxstudiohomepage
+Observed: 2026-10-05.
+
+paint.rgba16f: public runtime equirectangular environment used by the body paint.
+studio.rgba16f: public runtime environment used by ordinary surface materials.
+glass.rgba16f: public runtime environment used by privacy glass.
+wheel.rgba16f: public runtime environment shared by the three 21-inch wheel finishes.
+wheel-glass.rgba16f: public runtime environment used by the radiant wheel's transparent center cover.
+window-trim.rgba16f: public runtime environment used by the silver outer window surround (observed 2026-10-06).
+Each JSON sidecar records the source dimensions and pixel format. Pixel values are little-endian RGBA16F linear radiance, not display-encoded images.
+
+Captured from already-loaded public rendering resources to reproduce the reference lighting in this user-requested local project. These are reference-site assets, not original assets created by this project. Original ownership is unchanged; this file does not grant a redistribution license.
+The visible hemisphere and ground in the local page are separately constructed in code. The vehicle geometry is the user's Blender model.

@@ -1,0 +1,46 @@
+# Dependencies and build outputs
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Local validation, logs, and raw exports
+artifacts/
+logs/
+reference/
+export-cache/
+tools/export-cache/
+playwright-report/
+test-results/
+*.log
+*.raw.glb
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.npmrc
+
+# Native source files, backups, and temporary files
+*.blend
+*.blend[0-9]*
+*.bak
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+__pycache__/
+*.py[cod]
+
+# Editor and OS state
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini

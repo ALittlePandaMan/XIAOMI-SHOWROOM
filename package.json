@@ -1,0 +1,60 @@
+{
+  "name": "xiaomi-showroom",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "npm run typecheck && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "check": "npm run test && npm run build",
+    "assets:check": "node --experimental-strip-types scripts/check-assets.mjs",
+    "assets:compress": "node scripts/compress-environments.mjs",
+    "assets:optimize": "node scripts/optimize-model.mjs"
+  },
+  "keywords": [
+    "threejs",
+    "react",
+    "typescript",
+    "webgl",
+    "3d",
+    "vehicle-configurator",
+    "showroom"
+  ],
+  "author": "ALittlePandaMan",
+  "license": "MIT",
+  "description": "Interactive 3D vehicle showroom for N70 and N90 Max, built with React, TypeScript and Three.js. Explore exterior and interior configurations, animated doors, and cabin features.",
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "meshoptimizer": "^1.3.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.17.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ALittlePandaMan/XIAOMI-SHOWROOM.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ALittlePandaMan/XIAOMI-SHOWROOM/issues"
+  },
+  "homepage": "https://github.com/ALittlePandaMan/XIAOMI-SHOWROOM#readme"
+}

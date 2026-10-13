@@ -1,0 +1,743 @@
+{
+  "radiant-silver": {
+    "reference": "轮辋装饰-21寸. 豪华多辐 ACAL25",
+    "color": [
+      0.5840784178830671,
+      0.5906188409113381,
+      0.623960391667596
+    ],
+    "metalness": 1,
+    "roughness": 0.28,
+    "envMapIntensity": 1,
+    "envMapRotation": [
+      0,
+      0,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 1.5,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1.6000000000000003,
+    "specularIntensity": 12.17,
+    "specularColor": [
+      0.8962693533719567,
+      0.913098651791473,
+      0.982250550332711
+    ],
+    "clearcoatRoughness": 0,
+    "clearcoat": 1,
+    "envColor": [
+      1,
+      1,
+      1
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0.00030352698352941176
+    ],
+    "fresnelPowerDark": 1,
+    "fresnelPowerLight": 1,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0,
+      0,
+      0
+    ],
+    "ambientColorBotIntensity": 1,
+    "receiveDirectLight": true,
+    "directLightIntensity": 0.6,
+    "environment": "wheel"
+  },
+  "radiant-body": {
+    "reference": "轮辋-21寸. 豪华多辐 ACAL25",
+    "color": [
+      0.13843161502267545,
+      0.13843161502267545,
+      0.14412847084818123
+    ],
+    "metalness": 1,
+    "roughness": 0.37,
+    "envMapIntensity": 1.8,
+    "envMapRotation": [
+      0,
+      0,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 0.99,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1.6000000000000003,
+    "specularIntensity": 0,
+    "specularColor": [
+      0.20155625378383743,
+      0.1912016827303171,
+      0.24620132669705552
+    ],
+    "clearcoatRoughness": 0,
+    "clearcoat": 1,
+    "envColor": [
+      0.1878207722902346,
+      0.20155625378383743,
+      0.23074004851362043
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0
+    ],
+    "fresnelPowerDark": 0,
+    "fresnelPowerLight": 0,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0.08650046202808521,
+      0.08650046202808521,
+      0.09305896283800832
+    ],
+    "ambientColorBotIntensity": 0.3,
+    "receiveDirectLight": false,
+    "directLightIntensity": 1,
+    "environment": "wheel"
+  },
+  "prism-silver": {
+    "reference": "轮辋装饰-21寸.低风阻造型3 ACAL17",
+    "color": [
+      0.3515325994898463,
+      0.36130677977297226,
+      0.407240211891531
+    ],
+    "metalness": 1,
+    "roughness": 0.28,
+    "envMapIntensity": 1,
+    "envMapRotation": [
+      0,
+      0,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 1.5,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1.6000000000000003,
+    "specularIntensity": 12.17,
+    "specularColor": [
+      0.8962693533719567,
+      0.913098651791473,
+      0.982250550332711
+    ],
+    "clearcoatRoughness": 0,
+    "clearcoat": 1,
+    "envColor": [
+      1,
+      1,
+      1
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0.00030352698352941176
+    ],
+    "fresnelPowerDark": 1,
+    "fresnelPowerLight": 1,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0,
+      0,
+      0
+    ],
+    "ambientColorBotIntensity": 1,
+    "receiveDirectLight": true,
+    "directLightIntensity": 0.6,
+    "environment": "wheel"
+  },
+  "prism-body": {
+    "reference": "轮辋 ACAL17 亮黑",
+    "color": [
+      0.13843161502267545,
+      0.13843161502267545,
+      0.14412847084818123
+    ],
+    "metalness": 1,
+    "roughness": 0.4,
+    "envMapIntensity": 4,
+    "envMapRotation": [
+      0.11,
+      0.35,
+      0.6,
+      "XYZ"
+    ],
+    "aoMapIntensity": 0.99,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1.6,
+    "specularIntensity": 0,
+    "specularColor": [
+      0.20155625378383743,
+      0.1912016827303171,
+      0.24620132669705552
+    ],
+    "clearcoatRoughness": 0,
+    "clearcoat": 1,
+    "envColor": [
+      0.19461783043107173,
+      0.20155625378383743,
+      0.21223075740342198
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0
+    ],
+    "fresnelPowerDark": 0,
+    "fresnelPowerLight": 0,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0.08650046202808521,
+      0.08650046202808521,
+      0.09305896283800832
+    ],
+    "ambientColorBotIntensity": 0.3,
+    "receiveDirectLight": false,
+    "directLightIntensity": 1,
+    "environment": "wheel"
+  },
+  "prism-inset": {
+    "reference": "轮辋 ACAL17 磨砂黑",
+    "color": [
+      0.33245153633549385,
+      0.33245153633549385,
+      0.33245153633549385
+    ],
+    "metalness": 0.6,
+    "roughness": 0.93,
+    "envMapIntensity": 4,
+    "envMapRotation": [
+      0.11,
+      0.35,
+      0.6,
+      "XYZ"
+    ],
+    "aoMapIntensity": 0.99,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1.6,
+    "specularIntensity": 0,
+    "specularColor": [
+      0.20155625378383743,
+      0.1912016827303171,
+      0.24620132669705552
+    ],
+    "clearcoatRoughness": 0.85,
+    "clearcoat": 1,
+    "envColor": [
+      0.19461783043107173,
+      0.20155625378383743,
+      0.21223075740342198
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0
+    ],
+    "fresnelPowerDark": 0,
+    "fresnelPowerLight": 0,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0.08650046202808521,
+      0.08650046202808521,
+      0.09305896283800832
+    ],
+    "ambientColorBotIntensity": 0.3,
+    "receiveDirectLight": false,
+    "directLightIntensity": 1,
+    "environment": "wheel"
+  },
+  "star-silver": {
+    "reference": "轮辋-21寸. 运动造型5 ACAL40",
+    "color": [
+      0.3515325994898463,
+      0.36130677977297226,
+      0.407240211891531
+    ],
+    "metalness": 1,
+    "roughness": 0.52,
+    "envMapIntensity": 5.2,
+    "envMapRotation": [
+      0,
+      0,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 1.5,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1.6000000000000003,
+    "specularIntensity": 12.17,
+    "specularColor": [
+      0.8962693533719567,
+      0.913098651791473,
+      0.982250550332711
+    ],
+    "clearcoatRoughness": 0,
+    "clearcoat": 1,
+    "envColor": [
+      1,
+      1,
+      1
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0.00030352698352941176
+    ],
+    "fresnelPowerDark": 1,
+    "fresnelPowerLight": 1,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0,
+      0,
+      0
+    ],
+    "ambientColorBotIntensity": 1,
+    "receiveDirectLight": true,
+    "directLightIntensity": 0.6,
+    "environment": "wheel"
+  },
+  "star-body": {
+    "reference": "轮辋装饰-21寸. 运动造型5 ACAL40",
+    "color": [
+      0.15592646369776456,
+      0.15592646369776456,
+      0.15592646369776456
+    ],
+    "metalness": 0.61,
+    "roughness": 0.27,
+    "envMapIntensity": 6.5,
+    "envMapRotation": [
+      0.37000000000000005,
+      0.13,
+      0.3200000000000001,
+      "XYZ"
+    ],
+    "aoMapIntensity": 0.99,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1.6,
+    "specularIntensity": 2,
+    "specularColor": [
+      0.08228270712149792,
+      0.08650046202808521,
+      0.11953842797895521
+    ],
+    "clearcoatRoughness": 0.15,
+    "clearcoat": 1,
+    "envColor": [
+      0.1844749944900301,
+      0.19461783043107173,
+      0.20863687013464577
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0
+    ],
+    "fresnelPowerDark": 0,
+    "fresnelPowerLight": 0,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0.08650046202808521,
+      0.08650046202808521,
+      0.09305896283800832
+    ],
+    "ambientColorBotIntensity": 0.3,
+    "receiveDirectLight": false,
+    "directLightIntensity": 1,
+    "environment": "wheel"
+  },
+  "back": {
+    "reference": "轮辋 背部边缘",
+    "color": [
+      0.07036009568874305,
+      0.07036009568874305,
+      0.07036009568874305
+    ],
+    "metalness": 1,
+    "roughness": 1,
+    "envMapIntensity": 0,
+    "envMapRotation": [
+      0,
+      0,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 0.99,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 2.33,
+    "specularIntensity": 10,
+    "specularColor": [
+      0.10702310296918527,
+      0.10702310296918527,
+      0.13013647668074665
+    ],
+    "clearcoatRoughness": 1,
+    "clearcoat": 1,
+    "envColor": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorDark": [
+      0.019382360952473074,
+      0.019382360952473074,
+      0.019382360952473074
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0.00030352698352941176
+    ],
+    "fresnelPowerDark": 0,
+    "fresnelPowerLight": 0,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0,
+      0,
+      0
+    ],
+    "ambientColorBotIntensity": 0.4,
+    "receiveDirectLight": false,
+    "directLightIntensity": 1,
+    "environment": "studio"
+  },
+  "badge-base": {
+    "reference": "Logo底板-银色",
+    "color": [
+      0.24620132669705552,
+      0.24620132669705552,
+      0.2501582847191642
+    ],
+    "metalness": 0.8,
+    "roughness": 0.37,
+    "envMapIntensity": 12,
+    "envMapRotation": [
+      0,
+      0,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 0.99,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 2.33,
+    "specularIntensity": 20,
+    "specularColor": [
+      0.8631572134510892,
+      0.8713671191959567,
+      1
+    ],
+    "clearcoatRoughness": 0.25,
+    "clearcoat": 1,
+    "envColor": [
+      0.13843161502267545,
+      0.14412847084818123,
+      0.16513219449147767
+    ],
+    "fresnelColorDark": [
+      0.019382360952473074,
+      0.019382360952473074,
+      0.019382360952473074
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0.00030352698352941176
+    ],
+    "fresnelPowerDark": 0.1,
+    "fresnelPowerLight": 1,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0.85499260812105,
+      0.9559733532482866,
+      1
+    ],
+    "ambientColorBotIntensity": 0.4,
+    "receiveDirectLight": true,
+    "directLightIntensity": 1,
+    "environment": "studio"
+  },
+  "badge-glyph": {
+    "reference": "Logo-字体-黑色",
+    "color": [
+      0.035601314869097636,
+      0.03954623527052923,
+      0.04373502925049377
+    ],
+    "metalness": 0.61,
+    "roughness": 0.26,
+    "envMapIntensity": 12,
+    "envMapRotation": [
+      0,
+      0,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 1,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1.9411764705882355,
+    "specularIntensity": 0,
+    "specularColor": [
+      1,
+      1,
+      1
+    ],
+    "clearcoatRoughness": 0,
+    "clearcoat": 1,
+    "envColor": [
+      0.09084171117479915,
+      0.09305896283800832,
+      0.10946171076915331
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0.00030352698352941176
+    ],
+    "fresnelPowerDark": 1,
+    "fresnelPowerLight": 1,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0.5972017883558645,
+      0.5972017883558645,
+      0.5972017883558645
+    ],
+    "ambientColorBotIntensity": 0.1,
+    "receiveDirectLight": true,
+    "directLightIntensity": 1,
+    "environment": "studio"
+  },
+  "cover": {
+    "reference": "轮毂玻璃盖",
+    "color": [
+      0.019382360952473074,
+      0.019382360952473074,
+      0.019382360952473074
+    ],
+    "metalness": 0.3,
+    "roughness": 0.05,
+    "envMapIntensity": 3.3,
+    "envMapRotation": [
+      0,
+      2,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 1,
+    "opacity": 0.5,
+    "transparent": true,
+    "depthWrite": false,
+    "ior": 1,
+    "specularIntensity": 1,
+    "specularColor": [
+      0,
+      0,
+      0
+    ],
+    "clearcoatRoughness": 0,
+    "clearcoat": 1,
+    "envColor": [
+      1,
+      1,
+      1
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0.00030352698352941176
+    ],
+    "fresnelPowerDark": 1,
+    "fresnelPowerLight": 1,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0,
+      0,
+      0
+    ],
+    "ambientColorBotIntensity": 1,
+    "receiveDirectLight": false,
+    "directLightIntensity": 1,
+    "environment": "wheel-glass"
+  },
+  "valve": {
+    "reference": "轮毂螺丝 黑色",
+    "color": [
+      0.031896033067374104,
+      0.031896033067374104,
+      0.031896033067374104
+    ],
+    "metalness": 0.96,
+    "roughness": 0.31,
+    "envMapIntensity": 0,
+    "envMapRotation": [
+      0,
+      0,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 2,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1.6000000000000003,
+    "specularIntensity": 60,
+    "specularColor": [
+      0.23074004851362043,
+      0.23074004851362043,
+      0.23074004851362043
+    ],
+    "clearcoatRoughness": 0.65,
+    "clearcoat": 1,
+    "envColor": [
+      0.05126945836711539,
+      0.05126945836711539,
+      0.05126945836711539
+    ],
+    "fresnelColorDark": [
+      0.059511238155621766,
+      0.059511238155621766,
+      0.06301001764564068
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0.00030352698352941176
+    ],
+    "fresnelPowerDark": 0.5,
+    "fresnelPowerLight": 1,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0.08650046202808521,
+      0.08650046202808521,
+      0.09305896283800832
+    ],
+    "ambientColorBotIntensity": 0.5,
+    "receiveDirectLight": true,
+    "directLightIntensity": 1,
+    "environment": "wheel"
+  },
+  "tire": {
+    "reference": "轮胎 前轮",
+    "color": [
+      0.22696587349938613,
+      0.22696587349938613,
+      0.23839757380151394
+    ],
+    "metalness": 0.8,
+    "roughness": 0.53,
+    "envMapIntensity": 0.8,
+    "envMapRotation": [
+      0,
+      0,
+      0,
+      "XYZ"
+    ],
+    "aoMapIntensity": 0.9,
+    "opacity": 1,
+    "transparent": false,
+    "depthWrite": true,
+    "ior": 1,
+    "specularIntensity": 0,
+    "specularColor": [
+      0.08650046202808521,
+      0.09084171117479915,
+      0.09305896283800832
+    ],
+    "clearcoatRoughness": 1,
+    "clearcoat": 1,
+    "envColor": [
+      0.7835377915215659,
+      0.8307698767709715,
+      1
+    ],
+    "fresnelColorDark": [
+      0,
+      0,
+      0
+    ],
+    "fresnelColorLight": [
+      0,
+      0,
+      0
+    ],
+    "fresnelPowerDark": 0.8,
+    "fresnelPowerLight": 1,
+    "fresnelFalloff": 1,
+    "ambientColorBot": [
+      0,
+      0,
+      0
+    ],
+    "ambientColorBotIntensity": 1.2,
+    "receiveDirectLight": true,
+    "directLightIntensity": 0.36,
+    "environment": "studio"
+  }
+}

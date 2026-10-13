@@ -1,0 +1,9 @@
+{
+  "sourcePage": "https://show.xiaomiev.com/v2/showroom?itemId=510036425189&ssuId=610085836993&source=pcn90maxstudiohomepage",
+  "retrievedAt": "2026-10-05",
+  "purpose": "Restore missing sidewall markings and rubber surface detail to the user's existing 21-inch tire geometry and original UV coordinates.",
+  "front-detail.png": "Public carTyre_02_Left_Front map, original 1024x1024 sRGB image; 255/45R21 markings.",
+  "rear-detail.png": "Public carTyre_02_Left_Back map, original 1024x1024 sRGB image; 265/45R21 markings.",
+  "rubber-occlusion.png": "Public carTyre_02 aoMap decoded through the existing page renderer. Linear sampled RGB, no additional sRGB decoding.",
+  "geometry": "The user's local model. No official mesh was substituted."
+}
