@@ -6,6 +6,16 @@ An interactive 3D vehicle showroom built with React, TypeScript, and Three.js. E
 
 This is an independently developed, unofficial showcase. Vehicle names and trademarks belong to their respective owners.
 
+## Deploy with Docker
+
+```bash
+docker run -d --name xiaomi-showroom --restart unless-stopped -p 8080:8080 ghcr.io/alittlepandaman/xiaomi-showroom:latest
+```
+
+Open [http://localhost:8080](http://localhost:8080). The image supports AMD64 and ARM64 and includes all website assets. Alternatively, run `docker compose up -d` from this repository.
+
+[Releases](https://github.com/ALittlePandaMan/XIAOMI-SHOWROOM/releases) include static website archives, a Compose deployment bundle, and SHA-256 checksums. See the [deployment guide](docs/deployment.md) for configuration.
+
 ## Features
 
 - **Multiple vehicles:** N70 Max, N70 Pro, N90 Max, and N90 Max Explorer.
@@ -45,7 +55,7 @@ The first load downloads vehicle resources and compiles shaders. Models retain t
 | `npm run assets:check` | Validate asset references, model checksums, and HDR compression |
 | `npm run assets:compress` | Regenerate lossless gzip environment files |
 
-Tests run without a development server or GPU. They do not replace visual review in a browser. GitHub Actions runs `npm run check` for pushes to `main` and pull requests.
+Tests run without a development server or GPU. They do not replace visual review in a browser. GitHub Actions validates the code, builds the image, and tests container routes and assets. Pushes to `main` publish the `edge` image; version tags publish versioned images and GitHub Releases.
 
 ## Routes and vehicles
 
@@ -88,7 +98,10 @@ Temporary door and roof states are not persisted in the URL. Existing `model=n90
 ├── scripts/                   # Reusable asset maintenance tools
 ├── tests/                     # GPU-independent checks
 ├── docs/                      # Asset and deployment notes
-└── .github/workflows/ci.yml    # Automated tests and build
+├── Dockerfile                 # Node build + Nginx runtime
+├── compose.yaml               # Deploy the published image
+├── docker/nginx.conf          # Routing, assets, and caching
+└── .github/workflows/ci.yml    # Tests, container publishing, and releases
 ```
 
 The browser loads GLBs directly from `public/models/`. Native Blender files are maintained separately. Re-exporting a model requires updating its GLB and `manifest.json`. Some material, lighting, and geometry corrections are applied by `src/` after loading. Internal object names are linked to animation identifiers and should not be renamed in bulk.
@@ -102,7 +115,9 @@ npm run build
 npm run preview
 ```
 
-Serve the complete `dist/` directory from the root of a static host. BrowserRouter requires page requests such as `/exterior` and `/interior` to fall back to `index.html`, while asset requests must serve the actual files. The current configuration does not target a GitHub Pages project subdirectory. Pushing this repository does not publish a website automatically.
+Serve the complete `dist/` directory from the root of a static host, or use the Docker image. The image includes SPA routing, cache rules, and a health check. Publishing an image or release does not update your server automatically; use `docker compose pull && docker compose up -d` to update it.
+
+To publish the next version, start with a clean working tree, run `npm version patch`, then `git push origin main --follow-tags`. The tag must match `package.json`. Stable releases update `latest`; prereleases do not.
 
 ## License and asset attribution
 

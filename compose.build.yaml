@@ -1,0 +1,6 @@
+services:
+  showroom:
+    image: xiaomi-showroom:local
+    build:
+      context: .
+      dockerfile: Dockerfile

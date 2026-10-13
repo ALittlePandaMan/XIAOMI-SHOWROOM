@@ -1,0 +1,13 @@
+services:
+  showroom:
+    image: ${SHOWROOM_IMAGE:-ghcr.io/alittlepandaman/xiaomi-showroom:latest}
+    ports:
+      - "${SHOWROOM_PORT:-8080}:8080"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true

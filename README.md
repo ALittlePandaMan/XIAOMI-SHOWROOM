@@ -6,6 +6,16 @@
 
 这是独立开发的非官方展示项目。车型名称与商标归其各自权利人所有。
 
+## Docker 快速部署
+
+```bash
+docker run -d --name xiaomi-showroom --restart unless-stopped -p 8080:8080 ghcr.io/alittlepandaman/xiaomi-showroom:latest
+```
+
+访问 [http://localhost:8080](http://localhost:8080)。镜像支持 AMD64、ARM64，包含全部网页资源。也可以在项目目录运行 `docker compose up -d`。
+
+[版本下载](https://github.com/ALittlePandaMan/XIAOMI-SHOWROOM/releases)提供静态网站压缩包、Compose 部署包及 SHA-256 校验值。详细配置见[部署说明](docs/deployment.md)。
+
 ## 功能
 
 - **多车型展厅**：N70 Max、N70 Pro、N90 Max、N90 Max 探索版。
@@ -45,7 +55,7 @@ npm run dev
 | `npm run assets:check` | 检查资源引用、模型校验和及 HDR 压缩数据 |
 | `npm run assets:compress` | 重新生成环境贴图的无损 gzip 文件 |
 
-自动测试不依赖运行中的开发服务器，也不需要 GPU；它们不替代浏览器中的视觉验收。GitHub Actions 会在 `main` 推送和 Pull Request 时运行 `npm run check`。
+自动测试不依赖运行中的开发服务器，也不需要 GPU；它们不替代浏览器中的视觉验收。GitHub Actions 会检查代码、构建镜像并测试容器中的路由和资源；`main` 推送发布 `edge` 镜像，版本标签发布正式镜像及 GitHub Release。
 
 ## 路由与车型
 
@@ -88,7 +98,10 @@ npm run dev
 ├── scripts/                   # 可复用的资源维护工具
 ├── tests/                     # 无需 GPU 的自动检查
 ├── docs/                      # 资源维护与部署说明
-└── .github/workflows/ci.yml    # 自动测试和构建
+├── Dockerfile                 # Node 构建 + Nginx 运行镜像
+├── compose.yaml               # 拉取已发布镜像部署
+├── docker/nginx.conf          # 路由、静态资源及缓存配置
+└── .github/workflows/ci.yml    # 测试、镜像发布及 Release
 ```
 
 网页直接加载 `public/models/` 中的 GLB。Blender 源文件在仓库外维护；重新导出后，需要同步相应 GLB 和 `manifest.json`。网页中的部分材质、灯光和几何修正由 `src/` 在加载后应用。模型内部对象名与动画索引关联，不应批量重命名。
@@ -102,7 +115,9 @@ npm run build
 npm run preview
 ```
 
-将完整 `dist/` 部署至静态服务器的域名根目录。项目使用 BrowserRouter，服务器应将 `/exterior`、`/interior` 等页面路径回退至 `index.html`，并正常提供静态资源。当前不是 GitHub Pages 子目录配置，上传代码不会自动发布网站。
+将完整 `dist/` 部署至静态服务器的域名根目录，或使用上述 Docker 镜像。镜像已经配置 BrowserRouter 路由回退、资源缓存与健康检查。发布镜像和 Release 不会自动修改你的服务器；更新服务器时执行 `docker compose pull && docker compose up -d`。
+
+发布下一个版本：先确保工作区干净，执行 `npm version patch`，再执行 `git push origin main --follow-tags`。版本标签必须与 `package.json` 一致。正式版本更新 `latest`；预发布版本不会覆盖它。
 
 ## 许可证与资源来源
 

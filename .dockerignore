@@ -1,0 +1,21 @@
+# Explicit build context: never send credentials, Git history, or local caches.
+**
+!Dockerfile
+!.dockerignore
+!package.json
+!package-lock.json
+!index.html
+!tsconfig.json
+!vite.config.ts
+!LICENSE
+!THIRD_PARTY_NOTICES.md
+!src/
+!src/**
+!public/
+!public/**
+!scripts/
+!scripts/**
+!tests/
+!tests/**
+!docker/
+!docker/**
