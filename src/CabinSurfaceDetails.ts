@@ -5,7 +5,8 @@ export function cabinSurfaceRegions(name:string,auditedStandard=false,atlas=0){
  if(name.includes('后门板'))return `
   detailMetal=max(cabinBox(px,vec4(127.,180.,265.,232.)),cabinBox(px,vec4(288.,180.,363.,231.)));
   detailMetal=max(detailMetal,cabinBox(px,vec4(602.,865.,982.,895.)));
-  detailGrille=cabinRoundRect(px,vec2(232.,204.5),vec2(28.5,17.5),5.0);
+  // Match the original grille island; leave the rounded metal rim clear.
+  detailGrille=cabinRoundRect(px,vec2(229.5,204.),vec2(27.5,16.),5.0);
   detailGrille=max(detailGrille,cabinCircle(px,vec2(408.,642.),38.0));
   detailFabric=cabinBox(px,vec4(88.,650.,368.,928.));
  `;

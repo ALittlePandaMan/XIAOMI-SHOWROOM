@@ -9,8 +9,12 @@ vec3 seatLeatherAlbedo(float sand,float black){
 `;
 
 export const seatSoftLighting=`
+ // Rear-facing leather needs the cabin's bounced daylight as well as the
+ // ceiling/window emitters. Use world orientation so orbiting cannot change
+ // the fill, and blend across the curved sides without lifting front faces.
+ float seatBackFill=smoothstep(.10,.75,(vec4(normal,0.)*viewMatrix).x);
  reflectedLight.directDiffuse*=1.25;
- reflectedLight.indirectDiffuse*=.12;
+ reflectedLight.indirectDiffuse*=mix(.12,.28,seatBackFill);
  reflectedLight.directSpecular*=.65;
  reflectedLight.indirectSpecular*=.40;
 `;
