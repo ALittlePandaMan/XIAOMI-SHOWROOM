@@ -62,9 +62,10 @@ export function configureStandardCabinSurface(material:THREE.MeshPhysicalMateria
    diffuseColor.rgb*=1.+grain*.09;`);
   if(seat)shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`
    #if defined(USE_COLOR) || defined(USE_COLOR_ALPHA)
-    // The old 24 cm vertex bake cast large polygonal shadows across adjacent
-    // seat panels. Keep only a light contact term on the plain leather.
-    vec3 seatContact=mix(vec3(.65),vec3(1.),clamp(vColor.rgb,0.,1.));
+    // Coarse baked AO fans out from the rear-seat latch across whole triangles.
+    // Leather uses the curved surface's real lighting; only the cargo carpet
+    // retains this bake. Keep the original vertex attribute unchanged.
+    vec3 seatContact=vec3(1.);
     ${['cargo-back','cargo-base'].includes(surface)?'seatContact=mix(seatContact,vColor.rgb,cargoMask);':''}
     diffuseColor.rgb*=seatContact;
    #endif`);

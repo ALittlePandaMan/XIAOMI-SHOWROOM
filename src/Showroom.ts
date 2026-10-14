@@ -148,6 +148,7 @@ export class Showroom {
  private disposed=false;
  private lastTime=0;
  private size:ResizeObserver;
+ private viewportSize=new THREE.Vector2();
  private environmentTarget?:THREE.WebGLRenderTarget;
  private environmentSource?:THREE.DataTexture;
  private paintEnvironmentTarget?:THREE.WebGLRenderTarget;
@@ -193,11 +194,18 @@ export class Showroom {
   this.scene.add(this.vehicleRoot);
   this.size=new ResizeObserver(this.resize);this.size.observe(this.host);this.resize();
   document.addEventListener('visibilitychange',this.visibilityChanged);
+  document.addEventListener('fullscreenchange',this.refreshPresentation);
+  window.addEventListener('resize',this.refreshPresentation);
+  window.addEventListener('pageshow',this.refreshPresentation);
+  window.visualViewport?.addEventListener('resize',this.refreshPresentation);
   this.renderer.domElement.addEventListener('webglcontextlost',this.contextLost);
   this.renderer.domElement.addEventListener('webglcontextrestored',this.contextRestored);
   this.scheduler.wake();
  }
  private invalidate=()=>{this.dirty=true};
+ // A demand-rendered canvas must explicitly redraw when the browser presents
+ // it again, even if its CSS dimensions and the camera are unchanged.
+ refreshPresentation=()=>{if(this.disposed)return;this.resize();this.scheduler.present();};
  private cancelTween=()=>{this.cameraTween=undefined};
  private beginInteraction=()=>{if(this.benchmark)this.stopBenchmark();this.cancelTween();this.idleDeadline=Infinity};
  private armIdle(delay=1500){this.idleDeadline=this.ready&&this.view==='exterior'&&!this.viewJourney&&!this.config?.autoRotate&&!this.config?.roof&&!this.config?.dimensions?performance.now()+delay:Infinity;}
@@ -212,7 +220,7 @@ export class Showroom {
    const now=performance.now(),paused=this.pausedAt===null?0:now-this.pausedAt;this.pausedAt=null;
    if(this.cameraTween)this.cameraTween.started+=paused;if(this.viewJourney)this.viewJourney.started+=paused;if(this.seatJourney)this.seatJourney.started+=paused;this.wheelMotion.pauseFor(paused);
    if(this.benchmark)this.benchmark.started+=paused;
-   this.lastTime=now;this.scheduler.resume();this.scheduler.wakeAt(this.idleDeadline);this.dirty=true;
+   this.lastTime=now;this.scheduler.resume();this.scheduler.wakeAt(this.idleDeadline);this.refreshPresentation();
  }
  private pointerDown=(e:PointerEvent)=>{
   if(this.viewJourney||this.seatJourney||!this.ready)return;
@@ -290,14 +298,19 @@ export class Showroom {
   // resolution. Only the actual WebGL drawing-buffer limit may reduce this.
   const limit=this.renderer.getContext().getParameter(this.renderer.getContext().MAX_RENDERBUFFER_SIZE) as number;
   const ratio=Math.min(Math.max(devicePixelRatio,2),limit/Math.max(w,h));
-  if(this.renderer.getPixelRatio()!==ratio)this.renderer.setPixelRatio(ratio);
+  const ratioChanged=this.renderer.getPixelRatio()!==ratio;
+  if(ratioChanged)this.renderer.setPixelRatio(ratio);
   // CSS tracks the viewport immediately; update only the drawing buffer here.
-  this.renderer.setSize(w,h,false);this.camera.aspect=w/h;
+  // Assigning canvas.width/height clears the back buffer even at the same size.
+  this.renderer.getSize(this.viewportSize);
+  if(this.viewportSize.x!==w||this.viewportSize.y!==h)this.renderer.setSize(w,h,false);
+  this.camera.aspect=w/h;
   this.lampGlow.resize(w,h);
   // Preserve a 13.5-degree horizontal field on narrow screens. The previous
   // 20-degree field made the car about a third too small. Blend continuously
   // into the desktop lens so orientation changes do not jump at aspect=1.
   this.updateLens();this.dirty=true;
+  if(this.ready)this.scheduler.present();
  };
  private updateLens(){this.camera.fov=responsiveLens(this.lens,this.camera.aspect);this.camera.updateProjectionMatrix();}
  private setupStudio(){
@@ -445,7 +458,8 @@ export class Showroom {
   // instead of keeping them resident on an already memory-heavy mobile scene.
   if(!this.batchCalibration.exterior.enabled&&!this.batchCalibration.interior.enabled)this.displayBatch.dispose();
   this.displayBatch.setEnabled(!this.reference&&this.batchCalibration.exterior.enabled);this.displayBatch.sync(this.vehicleRoot);
-  this.ready=true;this.renderer.render(this.scene,this.camera);this.callbacks.onProgress(100);void this.configure(config);
+  this.ready=true;await this.configure(config);
+  this.controls.update();this.renderFrame();this.refreshPresentation();this.callbacks.onProgress(100);
  }
  private trackMaterials(wheels:THREE.Object3D[]=[...this.readyWheels.values()]){
   for(const root of [this.scene,...wheels])root.traverse(o=>{if(o instanceof THREE.Mesh)for(const m of Array.isArray(o.material)?o.material:[o.material])trackRenderMaterial(m,this.renderer);});
@@ -795,7 +809,7 @@ export class Showroom {
   if(q===1){this.seatJourney=undefined;this.camera.position.copy(journey.to.eye);this.interiorLook.enable(journey.to.lens);this.callbacks.onInteriorSeatChange(this.interiorSeat,false);}
  }
  resetView(){if(this.viewJourney||this.seatJourney)return;if(this.view==='interior'){const seat=seatCamera(this.interiorSeat,this.vehicle);if(!seat)return;this.interiorLook.reset(seat.rotation,seat.lens);this.dirty=true;}else this.moveCamera(HOME.clone(),TARGET.clone())}
- private tick=(now:number):boolean=>{
+ private tick=(now:number,present=false):boolean=>{
   if(this.disposed||document.hidden||this.contextUnavailable||!this.ready||this.comparing)return false;
   const dt=Math.min(.05,(now-this.lastTime)/1000||.016);this.lastTime=now;
   if(this.view==='exterior'&&!this.viewJourney&&this.ready&&now>=this.idleDeadline&&!this.pointers.size&&!this.cameraTween&&!this.config?.autoRotate&&!this.config?.roof&&!this.config?.dimensions){
@@ -843,7 +857,7 @@ export class Showroom {
   else if(this.seatJourney)this.updateSeatJourney(now);
   else if(this.view==='interior'){if(this.interiorLook.update(dt)){cameraMoving=true;this.lens=this.interiorLook.fieldOfView;this.updateLens();this.dirty=true;}}
   else{if(this.zoom.update(dt))this.dirty=true;if(this.controls.update()){cameraMoving=true;this.dirty=true;}}
-  const rendered=this.dirty;
+  const rendered=this.dirty||present;
   if(rendered){this.monitor.beginFrame(now);this.monitor.measure('frameCpuSubmission',()=>this.renderFrame(),false);}
   const continuing=this.reference||!!this.benchmark||!!this.cameraTween||!!this.viewJourney||!!this.seatJourney||this.wheelMotion.active||this.zoom.active||cameraMoving||this.controls.autoRotate||!this.openingsSettled||!this.roofSettled||this.projector?.playbackSettled===false||this.current.projector!==Number(this.config?.projector);
   this.monitor.endFrame(continuing&&rendered);return continuing;
@@ -981,7 +995,9 @@ export class Showroom {
   geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());
  }
  dispose(){
-  if(this.disposed)return;this.disposed=true;this.scheduler.dispose();this.monitor.dispose();this.displayBatch.dispose();this.seatSampling.dispose();this.viewJourney=undefined;this.idleDeadline=Infinity;this.size.disconnect();document.removeEventListener('visibilitychange',this.visibilityChanged);this.zoom.dispose();this.interiorLook.dispose();this.wheelMotion.dispose();this.controls.dispose();
+  if(this.disposed)return;this.disposed=true;this.scheduler.dispose();this.monitor.dispose();this.displayBatch.dispose();this.seatSampling.dispose();this.viewJourney=undefined;this.idleDeadline=Infinity;this.size.disconnect();document.removeEventListener('visibilitychange',this.visibilityChanged);
+  document.removeEventListener('fullscreenchange',this.refreshPresentation);window.removeEventListener('resize',this.refreshPresentation);window.removeEventListener('pageshow',this.refreshPresentation);window.visualViewport?.removeEventListener('resize',this.refreshPresentation);
+  this.zoom.dispose();this.interiorLook.dispose();this.wheelMotion.dispose();this.controls.dispose();
   this.renderer.domElement.removeEventListener('lostpointercapture',this.pointerCancel);window.removeEventListener('blur',this.clearInteraction);this.readyWheels.clear();
   this.renderer.domElement.removeEventListener('pointerdown',this.pointerDown);this.renderer.domElement.removeEventListener('pointerup',this.pointerUp);this.renderer.domElement.removeEventListener('webglcontextlost',this.contextLost);this.renderer.domElement.removeEventListener('webglcontextrestored',this.contextRestored);
   this.renderer.domElement.removeEventListener('pointermove',this.pointerMove);this.renderer.domElement.removeEventListener('pointercancel',this.pointerCancel);this.pickMeshes=[];this.pointers.clear();

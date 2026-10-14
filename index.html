@@ -1,2 +1,28 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/><link rel="icon" type="image/x-icon" href="/favicon.ico"/><link rel="preload" as="font" type="font/woff2" href="/fonts/misans/cs.2f934f6a30be65c8.0.woff2" crossorigin/><link rel="preload" as="font" type="font/woff2" href="/fonts/misans/lt.a6a7c6e600ff19f0.0.woff2" crossorigin/><meta name="theme-color" content="#64717b"/><meta name="description" content="N70 与 N90 Max 交互式 3D 汽车展厅，自由探索外观、内饰、配色、轮毂与车内功能。"/><title>Xiaomi Showroom · 3D 汽车展厅</title><link rel="preload" as="image" type="image/svg+xml" href="/icons/official/roofClose.svg"/><link rel="preload" as="image" type="image/svg+xml" href="/icons/official/doorClose.svg"/><link rel="preload" as="image" type="image/svg+xml" href="/icons/official/rule.svg"/><link rel="preload" as="image" type="image/svg+xml" href="/icons/official/closeFullScreen.svg"/></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<html lang="zh-CN">
+<head>
+ <meta charset="UTF-8"/>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+ <meta name="theme-color" content="#64717b"/>
+ <meta name="description" content="N70 与 N90 Max 交互式 3D 汽车展厅，自由探索外观、内饰、配色、轮毂与车内功能。"/>
+ <title>Xiaomi Showroom · 3D 汽车展厅</title>
+ <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+ <link rel="preload" as="font" type="font/woff2" href="/fonts/misans/cs.2f934f6a30be65c8.0.woff2" crossorigin/>
+ <link rel="preload" as="font" type="font/woff2" href="/fonts/misans/lt.a6a7c6e600ff19f0.0.woff2" crossorigin/>
+ <link rel="preload" as="image" type="image/svg+xml" href="/icons/official/roofClose.svg"/>
+ <link rel="preload" as="image" type="image/svg+xml" href="/icons/official/doorClose.svg"/>
+ <link rel="preload" as="image" type="image/svg+xml" href="/icons/official/rule.svg"/>
+ <link rel="preload" as="image" type="image/svg+xml" href="/icons/official/closeFullScreen.svg"/>
+ <!-- Visible before the external stylesheet and React/WebGL modules arrive. -->
+ <style>
+  html,body{margin:0;background:#1c252e}
+  .boot-screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#465665,#1c252e);color:#f5f5f3;font-family:"Microsoft YaHei",sans-serif}
+  .boot-screen strong{font-size:32px;font-weight:300;letter-spacing:2px}
+  .boot-screen p{margin:24px 0;font-size:12px;letter-spacing:4px;color:#c0cbd3}
+ </style>
+</head>
+<body>
+ <div id="root"><div class="boot-screen" role="status"><strong>3D 展厅</strong><p>正在驶入展厅</p></div></div>
+ <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

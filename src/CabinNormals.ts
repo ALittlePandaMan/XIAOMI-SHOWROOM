@@ -8,7 +8,8 @@ export function refineCabinNormals(root:THREE.Object3D){
  root.traverse(o=>{
   if(!(o instanceof THREE.Mesh)||done.has(o.geometry)||o.geometry.morphAttributes.position?.length)return;
   const materials=Array.isArray(o.material)?o.material:[o.material];
-  if(!materials.some(m=>/内饰_(前门板|后门板|仪表台|中央扶手|座舱)$/.test(m.name)))return;
+  if(!materials.some(m=>/内饰_(前门板|后门板|仪表台|中央扶手|座舱)$/.test(m.name)||
+   (m.userData.cabinSeat===true&&m.userData.cabinSurface==='leather')))return;
   const g=o.geometry,p=g.attributes.position,n=g.attributes.normal,index=g.index;
   if(!n||!index)return;done.add(g);
   const sums=new Float64Array(p.count*3),a=new THREE.Vector3(),b=new THREE.Vector3(),c=new THREE.Vector3();

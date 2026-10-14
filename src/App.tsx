@@ -1,4 +1,4 @@
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {assetUrl} from './assetUrl';
 import {Outlet,useLocation,useMatch,useNavigate} from 'react-router-dom';
 import {defaults,interiors} from './config';
@@ -56,6 +56,9 @@ function VehicleShowroom({vehicleId}:{vehicleId:VehicleId}){
   configRef.current=config;
   if(ready)void viewer.current?.configure(config).catch(()=>notify('轮毂加载失败，请重新选择。'));
  },[config,ready,notify]);
+ // The first load draw happens under the opaque loading screen. Submit a fresh
+ // frame after React removes that screen, before the demand loop settles.
+ useLayoutEffect(()=>{if(ready)viewer.current?.refreshPresentation();},[ready]);
  useEffect(()=>{
   // Back/forward may arrive during the camera journey. Apply the latest route on arrival.
   if(ready&&!viewBusy)viewer.current?.setView(requestedView);

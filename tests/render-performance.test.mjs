@@ -20,6 +20,18 @@ test('scheduler sleeps after settling, deduplicates input, and cancels hidden/di
  scheduler.dispose();assert.equal(frames.size,0);scheduler.wake();assert.equal(frames.size,0);
 });
 
+test('first reveal and same-size presentation redraw twice, then sleep without losing mid-frame requests',()=>{
+ const frames=new Map();let id=0,now=0,presented=0,revealDuringFrame=false;
+ const clock={request:f=>{frames.set(++id,f);return id;},cancel:i=>frames.delete(i),now:()=>now,setTimer:()=>++id,clearTimer:()=>{}};
+ const scheduler=new FrameScheduler((_now,present)=>{if(present)presented++;if(revealDuringFrame){revealDuringFrame=false;scheduler.present();}return false;},clock);
+ const frame=()=>{const [i,f]=frames.entries().next().value;frames.delete(i);f(now+=16.67);};
+ scheduler.present();scheduler.present();assert.equal(frames.size,1);frame();frame();assert.equal(presented,2);assert.equal(frames.size,0);
+ now+=5000;assert.equal(presented,2);
+ scheduler.wake();revealDuringFrame=true;frame();assert.equal(frames.size,1);frame();frame();assert.equal(presented,4);assert.equal(frames.size,0);
+ scheduler.pause();scheduler.present();assert.equal(frames.size,0);scheduler.resume();frame();frame();assert.equal(presented,6);assert.equal(frames.size,0);
+ scheduler.dispose();scheduler.present();assert.equal(frames.size,0);
+});
+
 test('display batches preserve attributes, indices, animated sources, picking and material switches',()=>{
  const vehicle=new THREE.Group(),door=new THREE.Group();vehicle.position.set(.3,.01,-.1);vehicle.add(door);
  const material=new THREE.MeshStandardMaterial(),meshes=[];
