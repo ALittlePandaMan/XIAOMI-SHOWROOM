@@ -167,7 +167,7 @@ export class Showroom {
  private renderedFrames=0;
 
  constructor(private host:HTMLDivElement,private callbacks:Callbacks,readonly vehicle:VehicleId='n90'){
-  const params=new URLSearchParams(location.search);this.profiling=params.get('perf')==='1';this.reference=this.profiling&&params.get('reference')==='1';
+  const params=new URLSearchParams(location.search);this.profiling=import.meta.env.DEV&&params.get('perf')==='1';this.reference=this.profiling&&params.get('reference')==='1';
   this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:false,powerPreference:'high-performance'});
   this.scheduler=new FrameScheduler(this.tick);this.monitor=new PerformanceMonitor(this.renderer,this.profiling);
   this.seatSampling=new SeatSamplingCache(this.renderer,this.invalidate,this.vehicle==='n90-standard'?'N90 Max rear-seat visual check failed; retaining original sampling':undefined);

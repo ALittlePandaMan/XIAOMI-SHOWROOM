@@ -24,32 +24,30 @@ Final default-path checks also passed: N70 exterior 0.99999987, N90 Max exterior
 
 最终默认路径复测通过：N70 外观 0.99999987、N90 Max 外观 0.99999879、保留原座椅算法后的 N90 Max 后排内饰 1.0。所有记录的关键区域均达到 0.999。13 项本地测试及构建通过，7 个 GLB 校验值未改变；Docker 路由、缓存、范围请求、全部模型和 6 个 HDR 环境检查通过。
 
-## Phone measurements / 手机实测
+## Developer measurements / 开发测量
 
-Open these links in **the same Xiaomi 14 browser**, with identical orientation, viewport, vehicle, paint, wheel and interior selections:
+The visible performance panel has been removed. Production builds ignore the legacy `perf` and `reference` parameters, keeping diagnostics and idle polling off even when opening an old diagnostic link.
 
-在同一台小米 14、同一个浏览器中打开以下链接，保持横竖屏、视口、车型、配色和轮毂一致：
+网页已移除性能诊断面板。生产版本忽略旧的 `perf`、`reference` 参数，旧诊断链接也不会启用诊断开销或空闲轮询。
 
-- [Optimized / 优化模式](https://alittlepandaman.github.io/XIAOMI-SHOWROOM/exterior/?model=n90-standard&perf=1)
-- [Reference / 参考模式](https://alittlepandaman.github.io/XIAOMI-SHOWROOM/exterior/?model=n90-standard&perf=1&reference=1)
+For local development only, `?perf=1` enables internal timing and `?perf=1&reference=1` selects the reference calculations. Once loading and animations settle, the existing `window.__showroom` development handle exposes `startBenchmark()`, `getPerformanceReport()`, `compareCurrentFrame()` and `downloadComparedImage('reference' | 'optimized')`. These interfaces do not add a page overlay or upload telemetry.
 
-Wait for loading and camera/feature animations to settle. Select **运行 30 秒测试**. Exterior mode runs a fixed orbit, zoom and door sequence; interior mode runs a fixed look/zoom sequence at the selected seat. Keep the tab visible and avoid touching the car during the run. Select **导出报告** after completion. Alternate the two modes for three runs each to reduce warm-up and thermal bias. Repeat for each vehicle; the model menu preserves diagnostic parameters.
+仅本地开发模式保留内部测量接口：`?perf=1` 启用计时，增加 `reference=1` 切换参考算法。加载和动画结束后，可以通过开发句柄 `window.__showroom` 调用上述方法；这些接口不显示面板，也不上传数据。
 
-等待加载及动画结束后点击“运行 30 秒测试”，测试时保持页面前台、不操作车辆，结束后“导出报告”。两种模式交替各测三次，降低预热和温度差异。分别测试各车型；车型菜单保留诊断参数。
+Exterior benchmarks run a fixed 30-second orbit, zoom and door sequence; interior benchmarks run a fixed look/zoom sequence at the selected seat. Keep the tab visible, use matching configurations and alternate repeated runs on the same device/browser. Export the returned report through browser developer tools.
 
 Reports separate CPU submission, asynchronous GPU elapsed time and actual frame intervals. Unsupported GPU timers remain unavailable; CPU submission is not GPU time. Settled gaps are excluded and disjoint GPU queries are discarded. Object counts and estimated auxiliary buffer sizes are not total VRAM measurements.
 
 报告分别标注 CPU 提交耗时、异步 GPU 耗时与实际帧间隔。没有 GPU 计时扩展时不填造 GPU 数据。显存对象数量和辅助缓冲估算也不是总显存读数。
 
-Reports and screenshots are downloaded locally, with no telemetry endpoint. The panel loads only with `perf=1`. `perf=1&reference=1` selects the former per-frame calculations and native display drawing, with idle polling enabled for comparison.
+外观测试使用 30 秒固定旋转、缩放和开门轨迹，内饰测试使用当前座位的固定环视、缩放轨迹。保持前台和配置一致，在同一设备、浏览器中交替重复测量，通过浏览器开发工具保存返回的报告。
 
-诊断仅在 `perf=1` 时加载，增加 `reference=1` 使用参考模式。数据只下载到本机、不上传。参考模式保留原逐帧计算、原生绘制和空闲轮询。
 
 ## Visual checks / 画质检查
 
-**对比当前画面** freezes the same camera at the same buffer size, renders both paths, and checks local 8×8 RGB SSIM across the full image and projected seat, screen, glass, mirror, paint and lamp regions. A failed 0.999 check restores the relevant original path for that viewer. Download both screenshots to inspect text, seams, quilting, glass and reflections; the aggregate score does not replace checking details.
+The development method `compareCurrentFrame()` freezes the same camera at the same buffer size, renders both paths, and checks local 8×8 RGB SSIM across the full image and projected seat, screen, glass, mirror, paint and lamp regions. A failed 0.999 check restores the relevant original path for that viewer. Compare both screenshots to inspect text, seams, quilting, glass and reflections; the aggregate score does not replace checking details.
 
-“对比当前画面”冻结同一相机、使用相同分辨率比较完整画面及关键部件区域。门槛为 SSIM 0.999，未通过会回退优化。下载截图检查文字、缝线、座椅纹理、玻璃和反射，不能只看整体分数。
+开发方法 `compareCurrentFrame()` 冻结同一相机、使用相同分辨率比较完整画面及关键部件区域。门槛为 SSIM 0.999，未通过会回退优化。检查截图中的文字、缝线、座椅纹理、玻璃和反射，不能只看整体分数。
 
 `npm run check` verifies source GLB checksums, copied attributes and indices, animation transforms, material switches, picking, unsupported-GPU fallback, scheduler sleep, asynchronous query behavior and seat-cache interpolation.
 
